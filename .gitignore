@@ -6,7 +6,7 @@
 /obj/
 
 # No publishing my own session key.
-Session.cs
+.session
 
 # Ignore the local cache of puzzle input data.
 /2015/

@@ -84,12 +84,14 @@ namespace Moyba.AdventOfCode
             var inputFile = $"{this.Year}/{day}.txt";
             if (File.Exists(inputFile)) return;
 
-            // make sure the session cookie has a value
-            if (String.IsNullOrEmpty(Session.CookieValue)) throw new Exception("Set the Advent of Code session cookie value in Session.cs.");
+            // read the session cookie value
+            const string sessionPath = ".session";
+            if (!File.Exists(sessionPath)) throw new Exception("Set the Advent of Code session cookie value in a .session file.");
+            var sessionCookieValue = await File.ReadAllTextAsync(sessionPath);
 
             // set up a client for requesting the input data
             var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Add("cookie", $"session={Session.CookieValue}");
+            httpClient.DefaultRequestHeaders.Add("cookie", $"session={sessionCookieValue}");
 
             // request the input data
             var inputUri = $"https://adventofcode.com/{this.Year}/day/{day}/input";
