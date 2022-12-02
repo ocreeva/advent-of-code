@@ -4,22 +4,44 @@ using System.Reflection;
 
 namespace Moyba.AdventOfCode
 {
-    using strings = IEnumerable<string>;
-
     internal abstract class PuzzlesBase
     {
         protected abstract int Year { get; }
 
         public abstract Task SolveAsync();
 
-        protected static strings LineDelimited(strings input) => input;
+        protected static IEnumerable<string> LineDelimited(IEnumerable<string> input) => input;
 
-        protected static strings AsStrings(strings input) => input;
+        protected static IEnumerable<string> AsStrings(IEnumerable<string> input) => input;
+        protected static IEnumerable<IEnumerable<long>> AsBatchesOfLongs(IEnumerable<string> input) =>
+            PuzzlesBase.AsBatchesOf<long>(input, Int64.Parse);
 
-        protected Task SolveAsync(Expression<Func<Func<strings, (string, string)>>> dayExpression) =>
+        private static IEnumerable<IEnumerable<T>> AsBatchesOf<T>(IEnumerable<string> input, Func<string, T> converter)
+        {
+            using (var enumerator = input.GetEnumerator())
+            {
+                while (enumerator.MoveNext())
+                {
+                    yield return PuzzlesBase.EnumerateGroup<T>(enumerator, converter);
+                }
+            }
+        }
+
+        private static IEnumerable<T> EnumerateGroup<T>(IEnumerator<string> enumerator, Func<string, T> converter)
+        {
+            do
+            {
+                if (String.IsNullOrEmpty(enumerator.Current)) yield break;
+
+                yield return converter(enumerator.Current);
+
+            } while (enumerator.MoveNext());
+        }
+
+        protected Task SolveAsync(Expression<Func<Func<IEnumerable<string>, (string, string)>>> dayExpression) =>
             this.SolveAsync(dayExpression, LineDelimited, AsStrings);
 
-        protected async Task SolveAsync<T>(Expression<Func<Func<T, (string, string)>>> dayExpression, Func<strings, strings> delimiter, Func<strings, T> converter)
+        protected async Task SolveAsync<T>(Expression<Func<Func<T, (string, string)>>> dayExpression, Func<IEnumerable<string>, IEnumerable<string>> delimiter, Func<IEnumerable<string>, T> converter)
         {
             var bodyExpression = (UnaryExpression)dayExpression.Body;
             var operandExpression = (MethodCallExpression)bodyExpression.Operand;
@@ -50,7 +72,7 @@ namespace Moyba.AdventOfCode
             }
         }
 
-        private async Task<strings> GetInputAsync(int day)
+        private async Task<IEnumerable<string>> GetInputAsync(int day)
         {
             await this.EnsureInputFileAsync(day);
             return await File.ReadAllLinesAsync($"{this.Year}/{day}.txt");
