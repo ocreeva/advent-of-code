@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Moyba.AdventOfCode
 {
@@ -40,6 +41,9 @@ namespace Moyba.AdventOfCode
 
         protected Task SolveAsync(Expression<Func<Func<IEnumerable<string>, (string, string)>>> dayExpression) =>
             this.SolveAsync(dayExpression, LineDelimited, AsStrings);
+
+        protected Task SolveAsync(Expression<Func<Func<IEnumerable<Match>, (string, string)>>> dayExpression, Func<IEnumerable<string>, IEnumerable<string>> delimiter, Regex regex)
+            => this.SolveAsync(dayExpression, delimiter, (IEnumerable<string> input) => input.Select(i => regex.Match(i)));
 
         protected async Task SolveAsync<T>(Expression<Func<Func<T, (string, string)>>> dayExpression, Func<IEnumerable<string>, IEnumerable<string>> delimiter, Func<IEnumerable<string>, T> converter)
         {

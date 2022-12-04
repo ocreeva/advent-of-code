@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace Moyba.AdventOfCode
 {
     internal class Puzzles2022 : PuzzlesBase
@@ -9,6 +11,28 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day1, LineDelimited, AsBatchesOfLongs);
             await this.SolveAsync(() => Puzzles2022.Day2);
             await this.SolveAsync(() => Puzzles2022.Day3);
+            await this.SolveAsync(() => Puzzles2022.Day4, LineDelimited, new Regex(@"(?<Min1>\d+)\-(?<Max1>\d+),(?<Min2>\d+)-(?<Max2>\d+)"));
+        }
+
+        [Answer("507", "897")]
+        private static (string, string) Day4(IEnumerable<Match> input)
+        {
+            long puzzle1 = 0L, puzzle2 = 0L;
+
+            foreach (var match in input)
+            {
+                var min1 = Int64.Parse(match.Groups["Min1"].Value);
+                var max1 = Int64.Parse(match.Groups["Max1"].Value);
+                var min2 = Int64.Parse(match.Groups["Min2"].Value);
+                var max2 = Int64.Parse(match.Groups["Max2"].Value);
+
+                if (min1 <= min2 && max1 >= max2) puzzle1++;
+                else if (min1 >= min2 && max1 <= max2) puzzle1++;
+
+                if (min1 <= max2 && min2 <= max1) puzzle2++;
+            }
+
+            return ($"{puzzle1}", $"{puzzle2}");
         }
 
         [Answer("7863", "2488")]
