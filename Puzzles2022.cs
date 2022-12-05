@@ -12,6 +12,63 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day2);
             await this.SolveAsync(() => Puzzles2022.Day3);
             await this.SolveAsync(() => Puzzles2022.Day4, LineDelimited, new Regex(@"(?<Min1>\d+)\-(?<Max1>\d+),(?<Min2>\d+)-(?<Max2>\d+)"));
+            await this.SolveAsync(() => Puzzles2022.Day5);
+        }
+
+        [Answer("HBTMTBSDC", "PQTJRSHWS")]
+        private static (string, string) Day5(IEnumerable<string> input)
+        {
+            var instructionRegex = new Regex(@"^move (?<Count>\d+) from (?<Source>\d+) to (?<Destination>\d+)$");
+
+            Stack<char>[] stacks1 = new Stack<char>[0], stacks2 = new Stack<char>[0], stacks = new Stack<char>[9];
+            for (var index = 0; index < stacks.Length; index++) stacks[index] = new Stack<char>();
+
+            var isParsingStacks = true;
+            foreach (var line in input)
+            {
+                if (String.IsNullOrWhiteSpace(line))
+                {
+                    stacks1 = stacks.Select(stack => new Stack<char>(stack)).ToArray();
+                    stacks2 = stacks.Select(stack => new Stack<char>(stack)).ToArray();
+                    isParsingStacks = false;
+                    continue;
+                }
+
+                if (isParsingStacks)
+                {
+                    if (!line.Contains('[')) continue;
+
+                    for (var index = 1; index < line.Length; index += 4)
+                    {
+                        var value = line[index];
+                        if (!Char.IsLetter(value)) continue;
+                        stacks[(index - 1) / 4].Push(value);
+                    }
+
+                    continue;
+                }
+
+                var match = instructionRegex.Match(line);
+                if (!match.Success) throw new Exception($"Unexpected failed to parse input: {line}");
+
+                var count = Int32.Parse(match.Groups["Count"].Value);
+                var source = Int32.Parse(match.Groups["Source"].Value) - 1;
+                var destination = Int32.Parse(match.Groups["Destination"].Value) - 1;
+
+                for (var x = 0; x < count; x++)
+                {
+                    stacks1[destination].Push(stacks1[source].Pop());
+                }
+
+                var tempStack = new Stack<char>();
+                for (var x = 0; x < count; x++) tempStack.Push(stacks2[source].Pop());
+                for (var x = 0; x < count; x++) stacks2[destination].Push(tempStack.Pop());
+            }
+
+            var puzzle1 = String.Join("", stacks1.Select(stack => stack.Peek()));
+            var puzzle2 = String.Join("", stacks2.Select(stack => stack.Peek()));
+
+            return (puzzle1, puzzle2);
         }
 
         [Answer("507", "897")]
