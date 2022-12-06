@@ -13,6 +13,7 @@ namespace Moyba.AdventOfCode
 
         protected static IEnumerable<string> LineDelimited(IEnumerable<string> input) => input;
 
+        protected static string AsString(IEnumerable<string> input) => input.Single();
         protected static IEnumerable<string> AsStrings(IEnumerable<string> input) => input;
         protected static IEnumerable<IEnumerable<long>> AsBatchesOfLongs(IEnumerable<string> input) =>
             PuzzlesBase.AsBatchesOf<long>(input, Int64.Parse);

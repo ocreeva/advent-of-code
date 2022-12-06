@@ -13,6 +13,29 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day3);
             await this.SolveAsync(() => Puzzles2022.Day4, LineDelimited, new Regex(@"(?<Min1>\d+)\-(?<Max1>\d+),(?<Min2>\d+)-(?<Max2>\d+)"));
             await this.SolveAsync(() => Puzzles2022.Day5);
+            await this.SolveAsync(() => Puzzles2022.Day6, LineDelimited, AsString);
+        }
+
+        [Answer("1356", "2564")]
+        private static (string, string) Day6(string input)
+        {
+            long puzzle1 = 0L, puzzle2 = 0L;
+
+            for (var index = 0; index < input.Length - 3; index++)
+            {
+                if (puzzle1 == 0)
+                {
+                    var distinctCount = input[index..(index+4)].Distinct().Count();
+                    if (distinctCount == 4) puzzle1 = index + 4;
+                }
+
+                var distinctCount2 = input[index..(index+14)].Distinct().Count();
+                if (distinctCount2 == 14) puzzle2 = index + 14;
+
+                if (puzzle2 != 0) break;
+            }
+
+            return ($"{puzzle1}", $"{puzzle2}");
         }
 
         [Answer("HBTMTBSDC", "PQTJRSHWS")]
