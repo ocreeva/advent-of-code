@@ -14,6 +14,86 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day4, LineDelimited, new Regex(@"(?<Min1>\d+)\-(?<Max1>\d+),(?<Min2>\d+)-(?<Max2>\d+)"));
             await this.SolveAsync(() => Puzzles2022.Day5);
             await this.SolveAsync(() => Puzzles2022.Day6, LineDelimited, AsString);
+            await this.SolveAsync(() => Puzzles2022.Day7);
+        }
+
+        private class File
+        {
+            public string Name { get; set; }
+            public long Size { get; set; }
+        }
+
+        private class Directory
+        {
+            public Directory() => (Files, SubDirectories) = (new List<File>(), new Dictionary<string, Directory>());
+
+            public string Name { get; set; }
+            public Directory Parent { get; set; }
+            public IList<File> Files { get; }
+            public IDictionary<string, Directory> SubDirectories { get; }
+
+            public long Size => this.Files.Sum(f => f.Size) + this.SubDirectories.Sum(d => d.Value.Size);
+        }
+
+        [Answer("1844187", "4978279")]
+        private static (string, string) Day7(IEnumerable<string> input)
+        {
+            var root = new Directory { Name = "/" };
+            var current = root;
+
+            var allDirectories = new List<Directory> { root };
+
+            foreach (var line in input)
+            {
+                if (String.IsNullOrWhiteSpace(line)) continue;
+
+                var parts = line.Split(' ');
+                switch (parts[0])
+                {
+                    case "$":
+                        switch (parts[1])
+                        {
+                            case "cd":
+                                switch (parts[2])
+                                {
+                                    case "/":
+                                        current = root;
+                                        break;
+
+                                    case "..":
+                                        current = current.Parent;
+                                        break;
+
+                                    default:
+                                        current = current.SubDirectories[parts[2]];
+                                        break;
+                                }
+                                break;
+
+                            case "ls":
+                                break;
+                        }
+                        break;
+
+                    case "dir":
+                        var newDirectory = new Directory { Name = parts[1], Parent = current };
+                        current.SubDirectories.Add(parts[1], newDirectory);
+                        allDirectories.Add(newDirectory);
+                        break;
+
+                    default:
+                        current.Files.Add(new File { Name = parts[1], Size = Int64.Parse(parts[0]) });
+                        break;
+                }
+            }
+
+            var puzzle1 = allDirectories.Where(d => d.Size <= 100000).Sum(d => d.Size);
+
+            var availableSpace = 70_000_000 - root.Size;
+            var neededSpace = 30_000_000 - availableSpace;
+            var puzzle2 = allDirectories.Where(d => d.Size > neededSpace).Min(d => d.Size);
+
+            return ($"{puzzle1}", $"{puzzle2}");
         }
 
         [Answer("1356", "2564")]
