@@ -15,6 +15,107 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day5);
             await this.SolveAsync(() => Puzzles2022.Day6, LineDelimited, AsString);
             await this.SolveAsync(() => Puzzles2022.Day7);
+            await this.SolveAsync(() => Puzzles2022.Day8);
+        }
+
+        [Answer("1818", "368368")]
+        private static (string, string) Day8(IEnumerable<string> input)
+        {
+            var treeArray = input.Select(row => row.ToCharArray().Select(c => c - '0').ToArray()).ToArray();
+            var height = treeArray.Length;
+            var width = treeArray[0].Length;
+
+            var visibleArray = new bool[height][];
+
+            var scenicArray = new int[height][];
+            for (var rowIndex = 0; rowIndex < height; rowIndex++)
+            {
+                scenicArray[rowIndex] = new int[width];
+                for (var columnIndex = 0; columnIndex < width; columnIndex++) scenicArray[rowIndex][columnIndex] = 1;
+            }
+
+            for (var rowIndex = 0; rowIndex < height; rowIndex++)
+            {
+                visibleArray[rowIndex] = new bool[width];
+                scenicArray[rowIndex] = new int[width];
+
+                for (var columnIndex = 0; columnIndex < width; columnIndex++)
+                {
+                    if (rowIndex == 0 || rowIndex == height - 1 || columnIndex == 0 || columnIndex == width - 1)
+                    {
+                        visibleArray[rowIndex][columnIndex] = true;
+                        scenicArray[rowIndex][columnIndex] = 0;
+                        continue;
+                    }
+
+                    scenicArray[rowIndex][columnIndex] = 1;
+
+                    for (var rowSeek = rowIndex - 1; rowSeek >= 0; rowSeek--)
+                    {
+                        if (treeArray[rowIndex][columnIndex] <= treeArray[rowSeek][columnIndex])
+                        {
+                            scenicArray[rowIndex][columnIndex] *= rowIndex - rowSeek;
+                            break;
+                        }
+
+                        if (rowSeek == 0)
+                        {
+                            visibleArray[rowIndex][columnIndex] = true;
+                            scenicArray[rowIndex][columnIndex] *= rowIndex - rowSeek;
+                        }
+                    }
+
+                    for (var rowSeek = rowIndex + 1; rowSeek < height; rowSeek++)
+                    {
+                        if (treeArray[rowIndex][columnIndex] <= treeArray[rowSeek][columnIndex])
+                        {
+                            scenicArray[rowIndex][columnIndex] *= rowSeek - rowIndex;
+                            break;
+                        }
+
+                        if (rowSeek == height - 1)
+                        {
+                            visibleArray[rowIndex][columnIndex] = true;
+                            scenicArray[rowIndex][columnIndex] *= rowSeek - rowIndex;
+                        }
+                    }
+
+                    for (var columnSeek = columnIndex - 1; columnSeek >= 0; columnSeek--)
+                    {
+                        if (treeArray[rowIndex][columnIndex] <= treeArray[rowIndex][columnSeek])
+                        {
+                            scenicArray[rowIndex][columnIndex] *= columnIndex - columnSeek;
+                            break;
+                        }
+
+                        if (columnSeek == 0)
+                        {
+                            visibleArray[rowIndex][columnIndex] = true;
+                            scenicArray[rowIndex][columnIndex] *= columnIndex - columnSeek;
+                        }
+                    }
+
+                    for (var columnSeek = columnIndex + 1; columnSeek < width; columnSeek++)
+                    {
+                        if (treeArray[rowIndex][columnIndex] <= treeArray[rowIndex][columnSeek])
+                        {
+                            scenicArray[rowIndex][columnIndex] *= columnSeek - columnIndex;
+                            break;
+                        }
+
+                        if (columnSeek == width - 1)
+                        {
+                            visibleArray[rowIndex][columnIndex] = true;
+                            scenicArray[rowIndex][columnIndex] *= columnSeek - columnIndex;
+                        }
+                    }
+                }
+            }
+
+            var puzzle1 = visibleArray.Sum(x => x.Where(y => y).Count());
+            var puzzle2 = scenicArray.Max(x => x.Max());
+
+            return ($"{puzzle1}", $"{puzzle2}");
         }
 
         private class File
