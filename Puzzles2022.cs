@@ -1,3 +1,4 @@
+using System;
 using System.Text.RegularExpressions;
 
 namespace Moyba.AdventOfCode
@@ -16,6 +17,59 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day6, LineDelimited, AsString);
             await this.SolveAsync(() => Puzzles2022.Day7);
             await this.SolveAsync(() => Puzzles2022.Day8);
+            await this.SolveAsync(() => Puzzles2022.Day9);
+        }
+
+        [Answer("6337")]
+        private static (string, string) Day9(IEnumerable<string> input)
+        {
+            var knots = new (int x, int y)[10];
+            for (var index = 0; index < 10; index++) knots[index] = (0, 0);
+
+            var locations1 = new HashSet<(int, int)> { knots[1] };
+            var locations2 = new HashSet<(int, int)> { knots[9] };
+
+            foreach (var line in input)
+            {
+                Func<(int x, int y), (int x, int y)> direction;
+                switch (line[0])
+                {
+                    case 'R':
+                        direction = ((int x, int y) head) => (head.x + 1, head.y);
+                        break;
+
+                    case 'L':
+                        direction = ((int x, int y) head) => (head.x - 1, head.y);
+                        break;
+
+                    case 'U':
+                        direction = ((int x, int y) head) => (head.x, head.y + 1);
+                        break;
+
+                    case 'D':
+                        direction = ((int x, int y) head) => (head.x, head.y - 1);
+                        break;
+
+                    default:
+                        throw new Exception($"Unhandled direction ({line[0]}) in input.");
+                }
+
+                var count = Int32.Parse(line.Substring(2));
+                for (var iteration = 0; iteration < count; iteration++)
+                {
+                    knots[0] = direction(knots[0]);
+                    for (var index = 1; index < 10; index++)
+                    {
+                        if (Math.Abs(knots[index - 1].x - knots[index].x) <= 1 && Math.Abs(knots[index - 1].y - knots[index].y) <= 1) break;
+
+                        knots[index] = (knots[index].x + Math.Sign(knots[index - 1].x - knots[index].x), knots[index].y + Math.Sign(knots[index - 1].y - knots[index].y));
+                        if (index == 1) locations1.Add(knots[index]);
+                        else if (index == 9) locations2.Add(knots[index]);
+                    }
+                }
+            }
+
+            return ($"{locations1.Count}", $"{locations2.Count}");
         }
 
         [Answer("1818", "368368")]
