@@ -18,9 +18,48 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day7);
             await this.SolveAsync(() => Puzzles2022.Day8);
             await this.SolveAsync(() => Puzzles2022.Day9);
+            await this.SolveAsync(() => Puzzles2022.Day10);
         }
 
-        [Answer("6337")]
+        [Answer("13480")]
+        private static (string, string) Day10(IEnumerable<string> input)
+        {
+            var cycle = 0;
+            var register = 1;
+            var puzzle1 = 0;
+            var puzzle2 = new char[6][];
+            for (var row = 0; row < 6; row++) puzzle2[row] = new char[40];
+
+            foreach (var line in input)
+            {
+                switch (line[0])
+                {
+                    case 'n':
+                        puzzle2[cycle/40][cycle%40] = Math.Abs(register - (cycle % 40)) <= 1 ? '#' : '.';
+                        if (++cycle % 40 == 20) puzzle1 += register * cycle;
+                        break;
+
+                    case 'a':
+                        puzzle2[cycle/40][cycle%40] = Math.Abs(register - (cycle % 40)) <= 1 ? '#' : '.';
+                        if (++cycle % 40 == 20) puzzle1 += register * cycle;
+                        puzzle2[cycle/40][cycle%40] = Math.Abs(register - (cycle % 40)) <= 1 ? '#' : '.';
+                        if (++cycle % 40 == 20) puzzle1 += register * cycle;
+                        register += Int32.Parse(line.Substring(5));
+                        break;
+
+                    default:
+                        throw new Exception($"Unexpected input: {line}");
+                }
+
+                if (cycle >= 240) break;
+            }
+
+            var puzzle2Result = String.Join('\n', puzzle2.Select(x => String.Join("", x)));
+
+            return ($"{puzzle1}", $"\n{puzzle2Result}");
+        }
+
+        [Answer("6337", "2455")]
         private static (string, string) Day9(IEnumerable<string> input)
         {
             var knots = new (int x, int y)[10];
