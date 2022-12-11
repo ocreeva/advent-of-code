@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 
 namespace Moyba.AdventOfCode
@@ -19,6 +20,133 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day8);
             await this.SolveAsync(() => Puzzles2022.Day9);
             await this.SolveAsync(() => Puzzles2022.Day10);
+            await this.SolveAsync(() => Puzzles2022.Day11, LineDelimited, AsBatchesOfStrings);
+        }
+
+        private class Monkey
+        {
+            private readonly Queue<long> _items1 = new Queue<long>();
+            private readonly Queue<long> _items2 = new Queue<long>();
+
+            public Queue<long> Items1 => _items1;
+            public Queue<long> Items2 => _items2;
+            public Func<long, long> Operation1 { get; set; }
+            public Func<long, long> Operation2 { get; set; }
+            public long TestDivisor { get; set; }
+            public int TrueMonkey { get; set; }
+            public int FalseMonkey { get; set; }
+            public long Inspections1 { get; set; }
+            public long Inspections2 { get; set; }
+        }
+
+        [Answer("99840", "20683044837")]
+        private static (string, string) Day11(IEnumerable<IEnumerable<string>> input)
+        {
+            const string ItemsPrefix = "  Starting items: ";
+            const string OperationPrefix = "  Operation: new = old ";
+            const string TestPrefix = "  Test: divisible by ";
+            const string TruePrefix = "    If true: throw to monkey ";
+            const string FalsePrefix = "    If false: throw to monkey ";
+
+            var monkeys = new List<Monkey>();
+
+            var commonDivisor = 1L;
+            foreach (var lines in input.Select(x => x.ToArray()))
+            {
+                var monkey = new Monkey();
+
+                if (!lines[1].StartsWith(ItemsPrefix)) throw new Exception("Starting items failure.");
+                var items = lines[1].Substring(ItemsPrefix.Length).Split(", ");
+                foreach (var item in items)
+                {
+                    var parsedItem = Int64.Parse(item);
+                    monkey.Items1.Enqueue(parsedItem);
+                    monkey.Items2.Enqueue(parsedItem);
+                }
+
+                if (!lines[2].StartsWith(OperationPrefix)) throw new Exception("Operation failure.");
+                var parts = lines[2].Substring(OperationPrefix.Length).Split(' ');
+                var parameter = Expression.Parameter(typeof(long));
+                Expression second = parts[1] == "old" ? parameter : Expression.Constant(Int64.Parse(parts[1]));
+                switch (parts[0])
+                {
+                    case "+":
+                        monkey.Operation1 = Expression.Lambda<Func<long, long>>(Expression.Divide(Expression.Add(parameter, second), Expression.Constant(3L)), parameter).Compile();
+                        monkey.Operation2 = Expression.Lambda<Func<long, long>>(Expression.Add(parameter, second), parameter).Compile();
+                        break;
+
+                    case "*":
+                        monkey.Operation1 = Expression.Lambda<Func<long, long>>(Expression.Divide(Expression.Multiply(parameter, second), Expression.Constant(3L)), parameter).Compile();
+                        monkey.Operation2 = Expression.Lambda<Func<long, long>>(Expression.Multiply(parameter, second), parameter).Compile();
+                        break;
+
+                    default:
+                        throw new Exception("Unrecognized operator.");
+                }
+
+                if (!lines[3].StartsWith(TestPrefix)) throw new Exception("Test failure.");
+                monkey.TestDivisor = Int64.Parse(lines[3].Substring(TestPrefix.Length));
+                commonDivisor = LCM(commonDivisor, monkey.TestDivisor);
+
+                if (!lines[4].StartsWith(TruePrefix)) throw new Exception("True monkey failure.");
+                monkey.TrueMonkey = Int32.Parse(lines[4].Substring(TruePrefix.Length));
+
+                if (!lines[5].StartsWith(FalsePrefix)) throw new Exception("False monkey failure.");
+                monkey.FalseMonkey = Int32.Parse(lines[5].Substring(FalsePrefix.Length));
+
+                monkeys.Add(monkey);
+            }
+
+            for (var iteration = 0; iteration < 20; iteration++)
+            {
+                for (var index = 0; index < monkeys.Count; index++)
+                {
+                    var monkey = monkeys[index];
+                    while (monkey.Items1.Any())
+                    {
+                        var item = monkey.Items1.Dequeue();
+                        item = monkey.Operation1(item);
+                        if (item % monkey.TestDivisor == 0)
+                        {
+                            monkeys[monkey.TrueMonkey].Items1.Enqueue(item);
+                        }
+                        else
+                        {
+                            monkeys[monkey.FalseMonkey].Items1.Enqueue(item);
+                        }
+
+                        monkey.Inspections1++;
+                    }
+                }
+            }
+
+            for (var iteration = 0; iteration < 10_000; iteration++)
+            {
+                for (var index = 0; index < monkeys.Count; index++)
+                {
+                    var monkey = monkeys[index];
+                    while (monkey.Items2.Any())
+                    {
+                        var item = monkey.Items2.Dequeue();
+                        item = monkey.Operation2(item);
+                        if (item % monkey.TestDivisor == 0)
+                        {
+                            monkeys[monkey.TrueMonkey].Items2.Enqueue(item % commonDivisor);
+                        }
+                        else
+                        {
+                            monkeys[monkey.FalseMonkey].Items2.Enqueue(item % commonDivisor);
+                        }
+
+                        monkey.Inspections2++;
+                    }
+                }
+            }
+
+            var puzzle1 = monkeys.OrderByDescending(monkey => monkey.Inspections1).Take(2).Aggregate(1L, (x, monkey) => x * monkey.Inspections1);
+            var puzzle2 = monkeys.OrderByDescending(monkey => monkey.Inspections2).Take(2).Aggregate(1L, (x, monkey) => x * monkey.Inspections2);
+
+            return ($"{puzzle1}", $"{puzzle2}");
         }
 
         [Answer("13480")]

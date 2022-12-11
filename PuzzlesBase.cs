@@ -11,12 +11,25 @@ namespace Moyba.AdventOfCode
 
         public abstract Task SolveAsync();
 
+        protected static long GCD(long a, long b)
+        {
+            if (b == 0) return a;
+            return GCD(b, a % b);
+        }
+
+        protected static long LCM(long a, long b)
+        {
+            return a * b / GCD(a, b);
+        }
+
         protected static IEnumerable<string> LineDelimited(IEnumerable<string> input) => input;
 
         protected static string AsString(IEnumerable<string> input) => input.Single();
         protected static IEnumerable<string> AsStrings(IEnumerable<string> input) => input;
         protected static IEnumerable<IEnumerable<long>> AsBatchesOfLongs(IEnumerable<string> input) =>
             PuzzlesBase.AsBatchesOf<long>(input, Int64.Parse);
+        protected static IEnumerable<IEnumerable<string>> AsBatchesOfStrings(IEnumerable<string> input) =>
+            PuzzlesBase.AsBatchesOf<string>(input, x => x);
 
         private static IEnumerable<IEnumerable<T>> AsBatchesOf<T>(IEnumerable<string> input, Func<string, T> converter)
         {
