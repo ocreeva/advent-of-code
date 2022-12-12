@@ -21,6 +21,107 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day9);
             await this.SolveAsync(() => Puzzles2022.Day10);
             await this.SolveAsync(() => Puzzles2022.Day11, LineDelimited, AsBatchesOfStrings);
+            await this.SolveAsync(() => Puzzles2022.Day12);
+        }
+
+        private class Coordinate
+        {
+            public Coordinate(char value, int x, int y)
+            {
+                if (value == 'S')
+                {
+                    IsStart = true;
+                    Height = 0;
+                }
+                else if (value == 'E')
+                {
+                    IsEnd = true;
+                    Height = 25;
+                }
+                else
+                {
+                    Height = value - 'a';
+                }
+
+                this.X = x;
+                this.Y = y;
+                this.StepsAway = Int32.MaxValue;
+            }
+
+            public bool IsStart;
+            public bool IsEnd;
+            public int Height;
+            public int X;
+            public int Y;
+
+            public int StepsAway;
+        }
+
+        [Answer("468", "459")]
+        private static (string, string) Day12(IEnumerable<string> input)
+        {
+            var map = input.Select((line, y) => line.Select((value, x) => new Coordinate(value, x, y)).ToArray()).ToArray();
+            var allCoordinates = map.SelectMany(x => x);
+            var width = map[0].Length;
+            var height = map.Length;
+
+            var end = allCoordinates.Single(x => x.IsEnd);
+            end.StepsAway = 0;
+
+            var testing = new Queue<Coordinate>();
+            testing.Enqueue(end);
+
+            while (testing.Any())
+            {
+                var node = testing.Dequeue();
+
+                var nextSteps = node.StepsAway + 1;
+
+                if (node.X > 0)
+                {
+                    var next = map[node.Y][node.X - 1];
+                    if (next.StepsAway > nextSteps && node.Height <= next.Height + 1)
+                    {
+                        next.StepsAway = nextSteps;
+                        testing.Enqueue(next);
+                    }
+                }
+
+                if (node.Y > 0)
+                {
+                    var next = map[node.Y - 1][node.X];
+                    if (next.StepsAway > nextSteps && node.Height <= next.Height + 1)
+                    {
+                        next.StepsAway = nextSteps;
+                        testing.Enqueue(next);
+                    }
+                }
+
+                if (node.X < width - 1)
+                {
+                    var next = map[node.Y][node.X + 1];
+                    if (next.StepsAway > nextSteps && node.Height <= next.Height + 1)
+                    {
+                        next.StepsAway = nextSteps;
+                        testing.Enqueue(next);
+                    }
+                }
+
+                if (node.Y < height - 1)
+                {
+                    var next = map[node.Y + 1][node.X];
+                    if (next.StepsAway > nextSteps && node.Height <= next.Height + 1)
+                    {
+                        next.StepsAway = nextSteps;
+                        testing.Enqueue(next);
+                    }
+                }
+            }
+
+            var puzzle1 = allCoordinates.Single(c => c.IsStart).StepsAway;
+            var puzzle2 = allCoordinates.Where(c => c.Height == 0).Min(c => c.StepsAway);
+
+            return ($"{puzzle1}", $"{puzzle2}");
         }
 
         private class Monkey
