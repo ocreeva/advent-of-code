@@ -22,6 +22,99 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day10);
             await this.SolveAsync(() => Puzzles2022.Day11, LineDelimited, AsBatchesOfStrings);
             await this.SolveAsync(() => Puzzles2022.Day12);
+            await this.SolveAsync(() => Puzzles2022.Day13, LineDelimited, AsBatchesOfStrings);
+        }
+
+        [Answer("5003", "20280")]
+        private static (string, string) Day13(IEnumerable<IEnumerable<string>> input)
+        {
+            var puzzle1 = 0L;
+            var index = 0;
+            var allSignals = new List<DistressSignal>();
+
+            foreach (var pair in input.Select(x => x.ToArray()))
+            {
+                index++;
+                var a = ParseDistressSignal(pair[0]);
+                var b = ParseDistressSignal(pair[1]);
+                allSignals.Add(a);
+                allSignals.Add(b);
+
+                if (CompareDistressSignals(a, b) < 0) puzzle1 += index;
+            }
+
+            var lessThan2 = allSignals.Where(s => CompareDistressSignals(s, new DistressSignal { Value = 2 }) < 0).Count();
+            var lessThan6 = allSignals.Where(s => CompareDistressSignals(s, new DistressSignal { Value = 6 }) < 0).Count();
+            var puzzle2 = (lessThan2 + 1) * (lessThan6 + 2);
+
+            return ($"{puzzle1}", $"{puzzle2}");
+        }
+
+        private static DistressSignal ParseDistressSignal(string input)
+        {
+            var signal = new DistressSignal();
+
+            var current = signal;
+            for (var index = 1; index < input.Length; index++)
+            {
+                switch (input[index])
+                {
+                    case '[':
+                        var next = new DistressSignal { Parent = current };
+                        current.Children.Add(next);
+                        current = next;
+                        break;
+
+                    case ']':
+                        current = current.Parent;
+                        break;
+
+                    case ',':
+                        break;
+
+                    default:
+                        var value = Int32.Parse(String.Join("", input.Skip(index).TakeWhile(ch => Char.IsDigit(ch))));
+                        current.Children.Add(new DistressSignal { Parent = current, Value = value });
+                        break;
+                }
+            }
+
+            return signal;
+        }
+
+        private class DistressSignal
+        {
+            private readonly List<DistressSignal> _children = new List<DistressSignal>();
+            public DistressSignal Parent { get; set; }
+            public int Value { get; set; } = -1;
+            public IList<DistressSignal> Children => _children;
+        }
+
+        private static int CompareDistressSignals(DistressSignal a, DistressSignal b)
+        {
+            if (a.Value > -1 && b.Value > -1) return a.Value.CompareTo(b.Value);
+
+            if (a.Value > -1)
+            {
+                a.Children.Add(new DistressSignal { Parent = a, Value = a.Value });
+                a.Value = -1;
+                return CompareDistressSignals(a, b);
+            }
+
+            if (b.Value > -1)
+            {
+                b.Children.Add(new DistressSignal { Parent = b, Value = b.Value });
+                b.Value = -1;
+                return CompareDistressSignals(a, b);
+            }
+
+            for (var index = 0; index < a.Children.Count && index < b.Children.Count; index++)
+            {
+                var partial = CompareDistressSignals(a.Children[index], b.Children[index]);
+                if (partial != 0) return partial;
+            }
+
+            return a.Children.Count.CompareTo(b.Children.Count);
         }
 
         private class Coordinate
