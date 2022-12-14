@@ -23,6 +23,70 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day11, LineDelimited, AsBatchesOfStrings);
             await this.SolveAsync(() => Puzzles2022.Day12);
             await this.SolveAsync(() => Puzzles2022.Day13, LineDelimited, AsBatchesOfStrings);
+            await this.SolveAsync(() => Puzzles2022.Day14);
+        }
+
+        [Answer("913", "30762")]
+        private static (string, string) Day14(IEnumerable<string> input)
+        {
+            var occupied = new HashSet<(int x, int y)>();
+
+            foreach (var line in input)
+            {
+                var points = line.Split(" -> ").Select(p => p.Split(',').Select(Int32.Parse).ToArray()).ToArray();
+                for (var index = 1; index < points.Length; index++)
+                {
+                    var start = points[index - 1];
+                    var end = points[index];
+                    for (int x = start[0], y = start[1]; x != end[0] || y != end[1]; x += Math.Sign(end[0] - start[0]), y += Math.Sign(end[1] - start[1]))
+                    {
+                        occupied.Add((x, y));
+                    }
+
+                    occupied.Add((end[0], end[1]));
+                }
+            }
+
+            var bottom = occupied.Max(o => o.y);
+            (int x, int y) current = (500, 0);
+            int puzzle1 = 0, puzzle2 = 0;
+            var puzzle1Complete = false;
+            while (true)
+            {
+                if (current.y == bottom + 1)
+                {
+                    occupied.Add(current);
+                    current = (500, 0);
+                    puzzle2++;
+                    puzzle1Complete = true;
+                }
+                else if (!occupied.Contains((current.x, current.y + 1)))
+                {
+                    current = (current.x, current.y + 1);
+                }
+                else if (!occupied.Contains((current.x - 1, current.y + 1)))
+                {
+                    current = (current.x - 1, current.y + 1);
+                }
+                else if (!occupied.Contains((current.x + 1, current.y + 1)))
+                {
+                    current = (current.x +  1, current.y + 1);
+                }
+                else if (current.y == 0)
+                {
+                    puzzle2++;
+                    break;
+                }
+                else
+                {
+                    occupied.Add(current);
+                    current = (500, 0);
+                    if (!puzzle1Complete) puzzle1++;
+                    puzzle2++;
+                }
+            }
+
+            return ($"{puzzle1}", $"{puzzle2}");
         }
 
         [Answer("5003", "20280")]
