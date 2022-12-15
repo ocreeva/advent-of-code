@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 
@@ -24,6 +25,54 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day12);
             await this.SolveAsync(() => Puzzles2022.Day13, LineDelimited, AsBatchesOfStrings);
             await this.SolveAsync(() => Puzzles2022.Day14);
+            await this.SolveAsync(() => Puzzles2022.Day15, LineDelimited, new Regex(@"Sensor at x=(?<sx>-?\d+), y=(?<sy>-?\d+): closest beacon is at x=(?<bx>-?\d+), y=(?<by>-?\d+)"));
+        }
+
+        [Answer("5367037", "11914583249288")]
+        private static (string, string) Day15(IEnumerable<Match> input)
+        {
+            var hasNoBeacons = new HashSet<long>();
+            var hasBeacons = new HashSet<long>();
+            var allReadings = new List<(long sx, long sy, long distance)>();
+
+            foreach (var match in input)
+            {
+                var sx = Int64.Parse(match.Groups["sx"].Value);
+                var sy = Int64.Parse(match.Groups["sy"].Value);
+                var bx = Int64.Parse(match.Groups["bx"].Value);
+                var by = Int64.Parse(match.Groups["by"].Value);
+
+                if (by == 2_000_000) hasBeacons.Add(bx);
+
+                var maxDistance = Math.Abs(sx - bx) + Math.Abs(sy - by);
+                allReadings.Add((sx, sy, maxDistance));
+
+                var yDistance = Math.Abs(sy - 2_000_000);
+                var xDistance = maxDistance - yDistance;
+                if (xDistance < 0) continue;
+                for (var x = sx - xDistance; x <= sx + xDistance; x++)
+                {
+                    hasNoBeacons.Add(x);
+                }
+            }
+
+            long puzzle2 = 0;
+            for (var y = 0L; y <= 4_000_000 && puzzle2 == 0; y++)
+            {
+                for (var x = 0L; x <= 4_000_000; )
+                {
+                    var reading = allReadings.Where(r => Math.Abs(r.sx - x) + Math.Abs(r.sy - y) < r.distance).FirstOrDefault();
+                    if (reading == default((long sx, long sy, long distance)))
+                    {
+                        puzzle2 = x * 4_000_000 + y;
+                        break;
+                    }
+
+                    x = reading.sx + reading.distance - Math.Abs(reading.sy - y) + 1;
+                }
+            }
+
+            return ($"{hasNoBeacons.Count - hasBeacons.Count}", $"{puzzle2}");
         }
 
         [Answer("913", "30762")]
