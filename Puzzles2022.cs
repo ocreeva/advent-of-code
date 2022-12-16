@@ -84,10 +84,12 @@ namespace Moyba.AdventOfCode
                 }
             }
 
+            var start = allValves["AA"];
             var interestingValves = allValves.Values.Where(v => v.Id > 0).ToArray();
-            var flowsPerRound = new Dictionary<long, Dictionary<long, long>>[29];
+            var earliestRound = 29 - interestingValves.Select(v => distance[start.Index, v.Index]).Min();
+            var flowsPerRound = new Dictionary<long, Dictionary<long, long>>[earliestRound + 1];
             flowsPerRound[0] = new Dictionary<long, Dictionary<long, long>>();
-            for (var round = 1; round < 29; round++)
+            for (var round = 1; round <= earliestRound; round++)
             {
                 var flows = new Dictionary<long, Dictionary<long, long>>();
                 flowsPerRound[round] = flows;
@@ -116,7 +118,6 @@ namespace Moyba.AdventOfCode
             }
 
             var puzzle1 = 0L;
-            var start = allValves["AA"];
             foreach (var first in interestingValves)
             {
                 var round = 29 - distance[start.Index, first.Index];
@@ -148,129 +149,7 @@ namespace Moyba.AdventOfCode
 
             return ($"{puzzle1}", $"{puzzle2}");
         }
-/*
-        private class Valve
-        {
-            private readonly Dictionary<string, int> _destinations = new Dictionary<string, int>();
-            public string Name { get; set; }
-            public long Flow { get; set; }
-            public string[] Exits { get; set; }
-            public Dictionary<string, int> Destinations => _destinations;
-        }
 
-// too high: 3198, 2770
-        [Answer("2077")]
-        private static (string, string) Day16(IEnumerable<Match> input)
-        {
-            var valves = new Dictionary<string, Valve>();
-            foreach (var match in input)
-            {
-                if (!match.Success)
-                {
-                    throw new Exception($"Failure to parse input: {match.Value}");
-                }
-
-                var valve = match.Groups["Valve"].Value;
-                var flow = Int64.Parse(match.Groups["Flow"].Value);
-                var exits = match.Groups["Exits"].Value.Split(", ");
-
-                valves.Add(valve, new Valve { Name = valve, Flow = flow, Exits = exits });
-            }
-
-            foreach (var valve in valves.Values.Where(v => v.Name == "AA" || v.Flow > 0))
-            {
-                var queue = new Queue<string>();
-                foreach (var exit in valve.Exits)
-                {
-                    valve.Destinations.Add(exit, 2);
-                    queue.Enqueue(exit);
-                }
-
-                while (queue.Any())
-                {
-                    var nextName = queue.Dequeue();
-                    var nextValve = valves[nextName];
-                    foreach (var exit in nextValve.Exits)
-                    {
-                        if (valve.Destinations.ContainsKey(exit)) continue;
-
-                        valve.Destinations.Add(exit, valve.Destinations[nextName] + 1);
-                        queue.Enqueue(exit);
-                    }
-                }
-
-                foreach (var key in valve.Destinations.Keys.Where(k => valves[k].Flow == 0).ToArray()) valve.Destinations.Remove(key);
-            }
-
-            var puzzle1 = FindMaxValveFlow(valves, "AA", 30, new HashSet<string>());
-
-            var puzzle2 = 0L;
-            var startDestinations = valves["AA"].Destinations;
-            foreach (var myValve in startDestinations)
-            {
-                var myValveName = myValve.Key;
-                var myValveDistance = myValve.Value;
-                foreach (var elephantValve in startDestinations.Where(d => myValveDistance >= d.Value).Where(v => v.Key != myValveName))
-                {
-                    puzzle2 = Math.Max(puzzle2, FindMaxValveFlow(valves, elephantValve.Key, 26 - elephantValve.Value, new HashSet<string> { myValveName, elephantValve.Key }, myValveName, myValveDistance - elephantValve.Value));
-                }
-            }
-
-            return ($"{puzzle1}", $"{puzzle2}");
-        }
-
-        private static long FindMaxValveFlow(Dictionary<string, Valve> valves, string currentValve, int timeRemaining, HashSet<string> activatedValves)
-        {
-            var max = 0L;
-
-            var nextValves = valves[currentValve].Destinations.Where(d => !activatedValves.Contains(d.Key) && d.Value < timeRemaining);
-            foreach (var nextValve in nextValves)
-            {
-                var nextRemaining = timeRemaining - nextValve.Value;
-                var nextActivated = new HashSet<string>(activatedValves) { nextValve.Key };
-                var nextValue = valves[nextValve.Key].Flow * nextRemaining + FindMaxValveFlow(valves, nextValve.Key, nextRemaining, nextActivated);
-                max = Math.Max(max, nextValue);
-            }
-
-            return max;
-        }
-
-        private static long FindMaxValveFlow(Dictionary<string, Valve> valves, string currentValve, int timeRemaining, HashSet<string> activatedValves, string otherTarget, int otherTime)
-        {
-            if (otherTime < 0)
-            {
-                Console.WriteLine("Oops?");
-            }
-
-            var max = 0L;
-
-            var nextValves = valves[currentValve].Destinations.Where(d => !activatedValves.Contains(d.Key) && d.Value < timeRemaining).ToArray();
-            foreach (var nextValve in nextValves)
-            {
-                var nextActivated = new HashSet<string>(activatedValves) { nextValve.Key };
-                if (nextValve.Value <= otherTime)
-                {
-                    var nextRemaining = timeRemaining - nextValve.Value;
-                    var nextValue = valves[nextValve.Key].Flow * nextRemaining + FindMaxValveFlow(valves, nextValve.Key, nextRemaining, nextActivated, otherTarget, otherTime - nextValve.Value);
-                    max = Math.Max(max, nextValue);
-                }
-                else
-                {
-                    var nextRemaining = timeRemaining - otherTime;
-                    var nextValue = valves[nextValve.Key].Flow * nextRemaining + FindMaxValveFlow(valves, otherTarget, nextRemaining, nextActivated, nextValve.Key, nextValve.Value - otherTime);
-                    max = Math.Max(max, nextValue);
-                }
-            }
-
-            if (nextValves.Length == 0)
-            {
-                var nextValue = FindMaxValveFlow(valves, otherTarget, timeRemaining - otherTime, activatedValves);
-                max = Math.Max(max, nextValue);
-            }
-
-            return max;
-        }
-*/
         [Answer("5367037", "11914583249288")]
         private static (string, string) Day15(IEnumerable<Match> input)
         {
