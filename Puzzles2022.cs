@@ -26,7 +26,7 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day13, LineDelimited, AsBatchesOfStrings);
             await this.SolveAsync(() => Puzzles2022.Day14);
             //await this.SolveAsync(() => Puzzles2022.Day15, LineDelimited, new Regex(@"Sensor at x=(?<sx>-?\d+), y=(?<sy>-?\d+): closest beacon is at x=(?<bx>-?\d+), y=(?<by>-?\d+)"));
-            //await this.SolveAsync(() => Puzzles2022.Day16, LineDelimited, new Regex(@"Valve (?<Name>[A-Z]+) has flow rate=(?<Flow>\d+); tunnels? leads? to valves? (?<Exits>.*)"));
+            await this.SolveAsync(() => Puzzles2022.Day16, LineDelimited, new Regex(@"Valve (?<Name>[A-Z]+) has flow rate=(?<Flow>\d+); tunnels? leads? to valves? (?<Exits>.*)"));
         }
 
         private class Valve
@@ -86,6 +86,7 @@ namespace Moyba.AdventOfCode
 
             var start = allValves["AA"];
             var interestingValves = allValves.Values.Where(v => v.Id > 0).ToArray();
+            var longestPath = interestingValves.Select(v => distance[start.Index, v.Index]).Max();
             var earliestRound = 29 - interestingValves.Select(v => distance[start.Index, v.Index]).Min();
             var flowsPerRound = new Dictionary<long, Dictionary<long, long>>[earliestRound + 1];
             flowsPerRound[0] = new Dictionary<long, Dictionary<long, long>>();
@@ -97,7 +98,8 @@ namespace Moyba.AdventOfCode
                 foreach (var valve in interestingValves)
                 {
                     var totalValveFlow = valve.Flow * round;
-                    var currentFlows = new Dictionary<long, long> { { valve.Id, totalValveFlow } };
+                    var currentFlows = new Dictionary<long, long>();
+                    if (round < longestPath) currentFlows.Add(valve.Id, totalValveFlow);
                     flows[valve.Id] = currentFlows;
                     foreach (var next in interestingValves)
                     {
@@ -125,14 +127,15 @@ namespace Moyba.AdventOfCode
             }
 
             var puzzle2 = 0L;
-            foreach (var first in interestingValves)
+            for (var firstIndex = 0; firstIndex < interestingValves.Length - 1; firstIndex++)
             {
+                var first = interestingValves[firstIndex];
                 var firstRound = 25 - distance[start.Index, first.Index];
                 var firstFlows = flowsPerRound[firstRound][first.Id];
-                foreach (var second in interestingValves)
-                {
-                    if (first.Id == second.Id) continue;
 
+                for (var secondIndex = firstIndex + 1; secondIndex < interestingValves.Length; secondIndex++)
+                {
+                    var second = interestingValves[secondIndex];
                     var secondRound = 25 - distance[start.Index, second.Index];
                     var secondFlows = flowsPerRound[secondRound][second.Id];
                     foreach (var firstFlow in firstFlows)
