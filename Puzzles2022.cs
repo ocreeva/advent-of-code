@@ -27,6 +27,117 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day14);
             //await this.SolveAsync(() => Puzzles2022.Day15, LineDelimited, new Regex(@"Sensor at x=(?<sx>-?\d+), y=(?<sy>-?\d+): closest beacon is at x=(?<bx>-?\d+), y=(?<by>-?\d+)"));
             await this.SolveAsync(() => Puzzles2022.Day16, LineDelimited, new Regex(@"Valve (?<Name>[A-Z]+) has flow rate=(?<Flow>\d+); tunnels? leads? to valves? (?<Exits>.*)"));
+            await this.SolveAsync(() => Puzzles2022.Day17, LineDelimited, AsString);
+        }
+
+        [Answer("3202", "1591977077352")]
+        private static (string, string) Day17(string input)
+        {
+            var puzzle1 = 0L;
+
+            var state = new Dictionary<(long, int), (long height, long iteration)>();
+
+            (int x, int y)[] current;
+            var height = 0L;
+            var maxRockHeight = 0;
+            var rocks = new HashSet<(int x, int y)> { (0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0) };
+
+            var inputIndex = 0;
+            for (var iteration = 0L; iteration < 1_000_000_000_000L; iteration++)
+            {
+                var nextIndex = iteration % 5;
+                switch (nextIndex)
+                {
+                    case 0:
+                        current = new[] { (2, maxRockHeight + 4), (5, maxRockHeight + 4), (3, maxRockHeight + 4), (4, maxRockHeight + 4) };
+                        break;
+
+                    case 1:
+                        current = new[] { (2, maxRockHeight + 5), (4, maxRockHeight + 5), (3, maxRockHeight + 4), (3, maxRockHeight + 6) };
+                        break;
+
+                    case 2:
+                        current = new[] { (2, maxRockHeight + 4), (4, maxRockHeight + 4), (3, maxRockHeight + 4), (4, maxRockHeight + 5), (4, maxRockHeight + 6) };
+                        break;
+
+                    case 3:
+                        current = new[] { (2, maxRockHeight + 5), (2, maxRockHeight + 6), (2, maxRockHeight + 4), (2, maxRockHeight + 7) };
+                        break;
+
+                    default:
+                        current = new[] { (2, maxRockHeight + 4), (3, maxRockHeight + 5), (3, maxRockHeight + 4), (2, maxRockHeight + 5) };
+                        break;
+                }
+
+                bool couldMoveDown;
+                do
+                {
+                    var action = input[inputIndex++ % input.Length];
+                    switch (action)
+                    {
+                        case '<':
+                            TryMoveRock(rocks, ((int x, int y) r) => (r.x - 1, r.y), ref current);
+                            break;
+
+                        case '>':
+                            TryMoveRock(rocks, ((int x, int y) r) => (r.x + 1, r.y), ref current);
+                            break;
+
+                        default:
+                            throw new Exception($"Unexpected character in input: {action}");
+                    }
+
+                    couldMoveDown = TryMoveRock(rocks, ((int x, int y) r) => (r.x, r.y - 1), ref current);
+                }
+                while (couldMoveDown);
+
+                foreach (var position in current) rocks.Add(position);
+
+                var solidLine = rocks.GroupBy(r => r.y).Where(g => g.Count() == 7).Select(g => g.First().y).Max();
+                if (solidLine > 0)
+                {
+                    height += solidLine;
+                    rocks = rocks
+                        .Where(r => r.y >= solidLine)
+                        .Select(r => (r.x, r.y - solidLine))
+                        .ToHashSet<(int x, int y)>();
+                }
+
+                maxRockHeight = rocks.Max(r => r.y);
+
+                if (iteration == 2021) puzzle1 = height + maxRockHeight;
+                else if (iteration > 2021)
+                {
+                    var key = (iteration % 5, inputIndex % input.Length);
+                    if (state.ContainsKey(key))
+                    {
+                        var history = state[key];
+                        var distance = iteration - history.iteration;
+                        var repetition = (1_000_000_000_000L - iteration) / distance;
+
+                        iteration += repetition * distance;
+                        height += (height - history.height) * repetition;
+                    }
+                    else
+                    {
+                        state[key] = (height, iteration);
+                    }
+                }
+            }
+
+            return ($"{puzzle1}", $"{height + maxRockHeight}");
+        }
+
+        private static bool TryMoveRock(HashSet<(int x, int y)> rocks, Func<(int x, int y), (int x, int y)> transform, ref (int x, int y)[] current)
+        {
+            var next = current.Select(r => transform(r)).ToArray();
+            if (next[0].x == -1) return false;
+            if (next[1].x == 7) return false;
+            if (next[2].y == 0) return false;
+            if (next.Any(r => rocks.Contains(r))) return false;
+
+            current = next;
+            return true;
         }
 
         private class Valve
