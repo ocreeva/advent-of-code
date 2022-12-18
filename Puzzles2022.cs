@@ -28,6 +28,73 @@ namespace Moyba.AdventOfCode
             //await this.SolveAsync(() => Puzzles2022.Day15, LineDelimited, new Regex(@"Sensor at x=(?<sx>-?\d+), y=(?<sy>-?\d+): closest beacon is at x=(?<bx>-?\d+), y=(?<by>-?\d+)"));
             await this.SolveAsync(() => Puzzles2022.Day16, LineDelimited, new Regex(@"Valve (?<Name>[A-Z]+) has flow rate=(?<Flow>\d+); tunnels? leads? to valves? (?<Exits>.*)"));
             await this.SolveAsync(() => Puzzles2022.Day17, LineDelimited, AsString);
+            await this.SolveAsync(() => Puzzles2022.Day18);
+        }
+
+        [Answer("3550", "2028")]
+        private static (string, string) Day18(IEnumerable<string> input)
+        {
+            var cubes = new HashSet<(int x, int y, int z)>();
+            foreach (var line in input)
+            {
+                var parts = line.Split(',');
+                cubes.Add((Int32.Parse(parts[0]), Int32.Parse(parts[1]), Int32.Parse(parts[2])));
+            }
+
+            var puzzle1 = 0L;
+            foreach (var cube in cubes)
+            {
+                if (!cubes.Contains((cube.x, cube.y, cube.z + 1))) puzzle1++;
+                if (!cubes.Contains((cube.x, cube.y, cube.z - 1))) puzzle1++;
+                if (!cubes.Contains((cube.x, cube.y + 1, cube.z))) puzzle1++;
+                if (!cubes.Contains((cube.x, cube.y - 1, cube.z))) puzzle1++;
+                if (!cubes.Contains((cube.x + 1, cube.y, cube.z))) puzzle1++;
+                if (!cubes.Contains((cube.x - 1, cube.y, cube.z))) puzzle1++;
+            }
+
+            var minX = cubes.Min(c => c.x) - 1;
+            var maxX = cubes.Max(c => c.x) + 1;
+            var minY = cubes.Min(c => c.y) - 1;
+            var maxY = cubes.Max(c => c.y) + 1;
+            var minZ = cubes.Min(c => c.z) - 1;
+            var maxZ = cubes.Max(c => c.z) + 1;
+
+            var queue = new Queue<(int x, int y, int z)>();
+            queue.Enqueue((minX, minY, minZ));
+
+            var empty = new HashSet<(int x, int y, int z)> { (minX, minY, minZ) };
+            Action<(int x, int y, int z), (int x, int y, int z)> transform = ((int x, int y, int z) coordinate, (int x, int y, int z) offset) =>
+            {
+                (int x, int y, int z) test = (coordinate.x + offset.x, coordinate.y + offset.y, coordinate.z + offset.z);
+                if (test.x < minX || test.x > maxX || test.y < minY || test.y > maxY || test.z < minZ || test.z > maxZ) return;
+                if (cubes.Contains(test) || empty.Contains(test)) return;
+                queue.Enqueue(test);
+                empty.Add(test);
+            };
+
+            while (queue.Count > 0)
+            {
+                var coordinate = queue.Dequeue();
+                transform(coordinate, (0, 0, -1));
+                transform(coordinate, (0, 0, 1));
+                transform(coordinate, (0, -1, 0));
+                transform(coordinate, (0, 1, 0));
+                transform(coordinate, (-1, 0, 0));
+                transform(coordinate, (1, 0, 0));
+            }
+
+            var puzzle2 = 0L;
+            foreach (var cube in cubes)
+            {
+                if (empty.Contains((cube.x, cube.y, cube.z + 1))) puzzle2++;
+                if (empty.Contains((cube.x, cube.y, cube.z - 1))) puzzle2++;
+                if (empty.Contains((cube.x, cube.y + 1, cube.z))) puzzle2++;
+                if (empty.Contains((cube.x, cube.y - 1, cube.z))) puzzle2++;
+                if (empty.Contains((cube.x + 1, cube.y, cube.z))) puzzle2++;
+                if (empty.Contains((cube.x - 1, cube.y, cube.z))) puzzle2++;
+            }
+
+            return ($"{puzzle1}", $"{puzzle2}");
         }
 
         [Answer("3202", "1591977077352")]
