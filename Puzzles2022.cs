@@ -29,6 +29,112 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day16, LineDelimited, new Regex(@"Valve (?<Name>[A-Z]+) has flow rate=(?<Flow>\d+); tunnels? leads? to valves? (?<Exits>.*)"));
             await this.SolveAsync(() => Puzzles2022.Day17, LineDelimited, AsString);
             await this.SolveAsync(() => Puzzles2022.Day18);
+            await this.SolveAsync(() => Puzzles2022.Day19, LineDelimited, new Regex(@"Blueprint (?<ID>\d+): Each ore robot costs (?<c00>\d+) ore. Each clay robot costs (?<c10>\d+) ore. Each obsidian robot costs (?<c20>\d+) ore and (?<c21>\d+) clay. Each geode robot costs (?<c30>\d+) ore and (?<c32>\d+) obsidian."));
+        }
+
+        private class RobotBlueprint
+        {
+            private readonly int[,] _costs = new int[4, 3];
+            public int ID { get; set; }
+            public int[,] Costs => _costs;
+        }
+
+        [Answer("1115", "25056")]
+        private static (string, string) Day19(IEnumerable<Match> input)
+        {
+            long puzzle1 = 0L, puzzle2 = 1L;
+            var blueprints = new List<RobotBlueprint>();
+
+            foreach (var match in input)
+            {
+                var blueprint = new RobotBlueprint { ID = Int32.Parse(match.Groups["ID"].Value) };
+
+                blueprint.Costs[0, 0] = Int32.Parse(match.Groups["c00"].Value);
+                blueprint.Costs[1, 0] = Int32.Parse(match.Groups["c10"].Value);
+                blueprint.Costs[2, 0] = Int32.Parse(match.Groups["c20"].Value);
+                blueprint.Costs[2, 1] = Int32.Parse(match.Groups["c21"].Value);
+                blueprint.Costs[3, 0] = Int32.Parse(match.Groups["c30"].Value);
+                blueprint.Costs[3, 2] = Int32.Parse(match.Groups["c32"].Value);
+
+                blueprints.Add(blueprint);
+            }
+
+            for (var blueprintIndex = 0; blueprintIndex < blueprints.Count; blueprintIndex++)
+            {
+                var blueprint = blueprints[blueprintIndex];
+
+                var maxOreRobots = Int32.Max(Int32.Max(blueprint.Costs[0,0], blueprint.Costs[1,0]), Int32.Max(blueprint.Costs[2,0], blueprint.Costs[3,0]));
+                var maxClaRobots = blueprint.Costs[2,1];
+                var maxObsRobots = blueprint.Costs[3,2];
+
+                var states = new HashSet<(int orR, int clR, int obR, int geR, int ore, int cla, int obs, int geo)> { (1, 0, 0, 0, 0, 0, 0, 0) };
+                for (var turn = 0; turn < 24 || (turn < 32 && blueprintIndex <= 2); turn++)
+                {
+                    var nextStates = new HashSet<(int oreRobots, int claRobots, int obsRobots, int geoRobots, int ore, int cla, int obs, int geo)>();
+                    foreach (var state in states)
+                    {
+                        // greedy, always build a geode robot if we can
+                        if (state.ore >= blueprint.Costs[3, 0] && state.obs >= blueprint.Costs[3,2])
+                        {
+                            AddAndTrimRobotStates(nextStates, (state.orR, state.clR, state.obR, state.geR + 1, state.ore + state.orR - blueprint.Costs[3,0], state.cla + state.clR, state.obs + state.obR - blueprint.Costs[3,2], state.geo + state.geR));
+                        }
+                        else
+                        {
+                            // build no robot
+                            AddAndTrimRobotStates(nextStates, (state.orR, state.clR, state.obR, state.geR, state.ore + state.orR, state.cla + state.clR, state.obs + state.obR, state.geo + state.geR));
+
+                            // build an ore robot
+                            if (state.ore >= blueprint.Costs[0, 0] && state.orR < maxOreRobots)
+                            {
+                                AddAndTrimRobotStates(nextStates, (state.orR + 1, state.clR, state.obR, state.geR, state.ore + state.orR - blueprint.Costs[0,0], state.cla + state.clR, state.obs + state.obR, state.geo + state.geR));
+                            }
+
+                            // build a clay robot
+                            if (state.ore >= blueprint.Costs[1, 0] && state.clR < maxClaRobots)
+                            {
+                                AddAndTrimRobotStates(nextStates, (state.orR, state.clR + 1, state.obR, state.geR, state.ore + state.orR - blueprint.Costs[1,0], state.cla + state.clR, state.obs + state.obR, state.geo + state.geR));
+                            }
+
+                            // build an obsidian robot
+                            if (state.ore >= blueprint.Costs[2, 0] && state.cla >= blueprint.Costs[2, 1] && state.obR < maxObsRobots)
+                            {
+                                AddAndTrimRobotStates(nextStates, (state.orR, state.clR, state.obR + 1, state.geR, state.ore + state.orR - blueprint.Costs[2,0], state.cla + state.clR - blueprint.Costs[2,1], state.obs + state.obR, state.geo + state.geR));
+                            }
+                        }
+                    }
+
+                    states = nextStates;
+
+                    if (turn == 23) puzzle1 += blueprint.ID * states.Max(s => s.geo);
+                    if (turn == 31) puzzle2 *= states.Max(s => s.geo);
+                    else if (turn > 20)
+                    {
+                        var remainingTurns = blueprintIndex <= 2 ? 30 - turn : 22 - turn;
+                        var maxNaturalGeo = states.Max(s => s.geo + remainingTurns * s.geR);
+                        var buyEveryTurn = remainingTurns * remainingTurns;
+                        var neededNaturalGeo = maxNaturalGeo - buyEveryTurn;
+                        var cantCatchUp = states.Where(s => s.geo + remainingTurns * s.geR < neededNaturalGeo).ToArray();
+                        foreach (var state in cantCatchUp)
+                        {
+                            states.Remove(state);
+                        }
+                    }
+                }
+            }
+
+            return ($"{puzzle1}", $"{puzzle2}");
+        }
+
+        private static void AddAndTrimRobotStates(
+            HashSet<(int orR, int clR, int obR, int geR, int ore, int cla, int obs, int geo)> states,
+            (int orR, int clR, int obR, int geR, int ore, int cla, int obs, int geo) state)
+        {
+            if (states.Any(s => s.orR >= state.orR && s.clR >= state.clR && s.obR >= state.obR && s.geR >= state.geR && s.ore >= state.ore && s.cla >= state.cla && s.obs >= state.obs && s.geo >= state.geo)) return;
+
+            var trimStates = states.Where(s => s.orR <= state.orR && s.clR <= state.clR && s.obR <= state.obR && s.geR <= state.geR && s.ore <= state.ore && s.cla <= state.cla && s.obs <= state.obs && s.geo <= state.geo).ToArray();
+            foreach (var trimState in trimStates) states.Remove(trimState);
+
+            states.Add(state);
         }
 
         [Answer("3550", "2028")]
