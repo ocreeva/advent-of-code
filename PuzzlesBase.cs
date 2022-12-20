@@ -24,6 +24,7 @@ namespace Moyba.AdventOfCode
 
         protected static IEnumerable<string> LineDelimited(IEnumerable<string> input) => input;
 
+        protected static IEnumerable<long> AsLongs(IEnumerable<string> input) => input.Select(Int64.Parse);
         protected static string AsString(IEnumerable<string> input) => input.Single();
         protected static IEnumerable<string> AsStrings(IEnumerable<string> input) => input;
         protected static IEnumerable<IEnumerable<long>> AsBatchesOfLongs(IEnumerable<string> input) =>

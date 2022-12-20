@@ -30,6 +30,83 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day17, LineDelimited, AsString);
             await this.SolveAsync(() => Puzzles2022.Day18);
             await this.SolveAsync(() => Puzzles2022.Day19, LineDelimited, new Regex(@"Blueprint (?<ID>\d+): Each ore robot costs (?<c00>\d+) ore. Each clay robot costs (?<c10>\d+) ore. Each obsidian robot costs (?<c20>\d+) ore and (?<c21>\d+) clay. Each geode robot costs (?<c30>\d+) ore and (?<c32>\d+) obsidian."));
+            await this.SolveAsync(() => Puzzles2022.Day20, LineDelimited, AsLongs);
+        }
+
+        private class CoordinateEncryptionNode
+        {
+            public long Value { get; set; }
+            public CoordinateEncryptionNode Previous { get; set; }
+            public CoordinateEncryptionNode Next { get; set; }
+
+            public void Move(long steps)
+            {
+                this.Previous.Next = this.Next;
+                this.Next.Previous = this.Previous;
+
+                for ( ; steps > 0; steps--) this.Next = this.Next.Next;
+                this.Previous = this.Next.Previous;
+
+                for ( ; steps < 0; steps++) this.Previous = this.Previous.Previous;
+                this.Next = this.Previous.Next;
+
+                this.Next.Previous = this;
+                this.Previous.Next = this;
+            }
+        }
+
+        [Answer("2203", "6641234038999")]
+        private static (string, string) Day20(IEnumerable<long> input)
+        {
+            var values = input.ToArray();
+            var length = values.Length;
+            var lengthLess1 = length - 1;
+            var nodes1 = CreateCoordinateEncryptionList(values);
+            var nodes2 = CreateCoordinateEncryptionList(values, 811589153);
+
+            for (var index = 0; index < length; index++)
+            {
+                var node = nodes1[index];
+                node.Move(node.Value % lengthLess1);
+            }
+
+            for (var iteration = 0; iteration < 10; iteration++)
+            {
+                for (var index = 0; index < length; index++)
+                {
+                    var node = nodes2[index];
+                    node.Move(node.Value % lengthLess1);
+                }
+            }
+
+            long puzzle1 = 0L, puzzle2 = 0L;
+            CoordinateEncryptionNode node1 = nodes1.Single(n => n.Value == 0), node2 = nodes2.Single(n => n.Value == 0);
+            for (var iteration = 0; iteration < 3; iteration++)
+            {
+                for (var index = 0; index < 1000; index++)
+                {
+                    node1 = node1.Next;
+                    node2 = node2.Next;
+                }
+
+                puzzle1 += node1.Value;
+                puzzle2 += node2.Value;
+            }
+
+            return ($"{puzzle1}", $"{puzzle2}");
+        }
+
+        private static List<CoordinateEncryptionNode> CreateCoordinateEncryptionList(IEnumerable<long> input, long multiplier = 1)
+        {
+            var nodes = input.Select(value => new CoordinateEncryptionNode { Value = value * multiplier }).ToList();
+
+            for (var index = 0; index < nodes.Count; index++)
+            {
+                nodes[index].Next = nodes[(index + 1) % nodes.Count];
+                nodes[index].Previous = nodes[index == 0 ? nodes.Count - 1 : index - 1];
+            }
+
+            return nodes;
         }
 
         private class RobotBlueprint
