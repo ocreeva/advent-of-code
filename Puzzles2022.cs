@@ -31,6 +31,121 @@ namespace Moyba.AdventOfCode
             await this.SolveAsync(() => Puzzles2022.Day18);
             await this.SolveAsync(() => Puzzles2022.Day19, LineDelimited, new Regex(@"Blueprint (?<ID>\d+): Each ore robot costs (?<c00>\d+) ore. Each clay robot costs (?<c10>\d+) ore. Each obsidian robot costs (?<c20>\d+) ore and (?<c21>\d+) clay. Each geode robot costs (?<c30>\d+) ore and (?<c32>\d+) obsidian."));
             await this.SolveAsync(() => Puzzles2022.Day20, LineDelimited, AsLongs);
+            await this.SolveAsync(() => Puzzles2022.Day21);
+        }
+
+        private class RiddleMonkey
+        {
+            private long? _value;
+            private RiddleMonkey? _left, _right;
+            private char? _operation;
+
+            public event Action? OnValueChanged;
+
+            public long? Value
+            {
+                get { return _value; }
+                set
+                {
+                    _value = value;
+                    this.OnValueChanged?.Invoke();
+                    this.SolveMonkey();
+                }
+            }
+
+            public void AssignOperation(char operation, RiddleMonkey left, RiddleMonkey right)
+            {
+                _operation = operation;
+                _left = left;
+                _right = right;
+
+                if (!_left.Value.HasValue) _left.OnValueChanged += this.SolveMonkey;
+                if (!_right.Value.HasValue) _right.OnValueChanged += this.SolveMonkey;
+
+                this.SolveMonkey();
+            }
+
+            private void SolveMonkey()
+            {
+                if (!_operation.HasValue || _left == null || _right == null) return;
+                if (_value.HasValue && _left.Value.HasValue && _right.Value.HasValue) return;
+                switch (_operation.Value)
+                {
+                    case '=':
+                        if (_left.Value.HasValue && !_right.Value.HasValue) _right.Value = _left.Value;
+                        else if (_right.Value.HasValue && !_left.Value.HasValue) _left.Value = _right.Value;
+                        break;
+
+                    case '+':
+                        if (_left.Value.HasValue && _right.Value.HasValue) this.Value = _left.Value.Value + _right.Value.Value;
+                        else if (_left.Value.HasValue && _value.HasValue) _right.Value = _value.Value - _left.Value.Value;
+                        else if (_right.Value.HasValue && _value.HasValue) _left.Value = _value.Value - _right.Value.Value;
+                        break;
+
+                    case '-':
+                        if (_left.Value.HasValue && _right.Value.HasValue) this.Value = _left.Value.Value - _right.Value.Value;
+                        else if (_left.Value.HasValue && _value.HasValue) _right.Value = _left.Value.Value - _value.Value;
+                        else if (_right.Value.HasValue && _value.HasValue) _left.Value = _value.Value + _right.Value.Value;
+                        break;
+
+                    case '*':
+                        if (_left.Value.HasValue && _right.Value.HasValue) this.Value = _left.Value.Value * _right.Value.Value;
+                        else if (_left.Value.HasValue && _value.HasValue) _right.Value = _value.Value / _left.Value.Value;
+                        else if (_right.Value.HasValue && _value.HasValue) _left.Value = _value.Value / _right.Value.Value;
+                        break;
+
+                    case '/':
+                        if (_left.Value.HasValue && _right.Value.HasValue) this.Value = _left.Value.Value / _right.Value.Value;
+                        else if (_left.Value.HasValue && _value.HasValue) _right.Value = _left.Value.Value / _value.Value;
+                        else if (_right.Value.HasValue && _value.HasValue) _left.Value = _value.Value * _right.Value.Value;
+                        break;
+                }
+            }
+        }
+
+        [Answer("157714751182692", "3373767893067")]
+        private static (string, string) Day21(IEnumerable<string> input)
+        {
+            long puzzle1 = 0L, puzzle2 = 0L;
+            var monkeys1 = new Dictionary<string, RiddleMonkey> { { "root", new RiddleMonkey() } };
+            var monkeys2 = new Dictionary<string, RiddleMonkey> { { "humn", new RiddleMonkey() } };
+
+            monkeys1["root"].OnValueChanged += () => puzzle1 = monkeys1["root"].Value.GetValueOrDefault(0L);
+            monkeys2["humn"].OnValueChanged += () => puzzle2 = monkeys2["humn"].Value.GetValueOrDefault(0L);
+
+            foreach (var line in input)
+            {
+                var parts = line.Split(' ');
+                var name = parts[0].Substring(0, 4);
+
+                if (!monkeys1.ContainsKey(name)) monkeys1.Add(name, new RiddleMonkey());
+                if (!monkeys2.ContainsKey(name)) monkeys2.Add(name, new RiddleMonkey());
+
+                if (parts.Length == 2)
+                {
+                    var value = Int64.Parse(parts[1]);
+                    monkeys1[name].Value = value;
+                    if (!name.Equals("humn")) monkeys2[name].Value = value;
+                }
+                else
+                {
+                    var leftName = parts[1];
+                    var operation = parts[2][0];
+                    var rightName = parts[3];
+
+                    if (!monkeys1.ContainsKey(leftName)) monkeys1.Add(leftName, new RiddleMonkey());
+                    if (!monkeys2.ContainsKey(leftName)) monkeys2.Add(leftName, new RiddleMonkey());
+                    
+                    if (!monkeys1.ContainsKey(rightName)) monkeys1.Add(rightName, new RiddleMonkey());
+                    if (!monkeys2.ContainsKey(rightName)) monkeys2.Add(rightName, new RiddleMonkey());
+
+                    monkeys1[name].AssignOperation(operation, monkeys1[leftName], monkeys1[rightName]);
+                    if (name.Equals("root")) operation = '=';
+                    monkeys2[name].AssignOperation(operation, monkeys2[leftName], monkeys2[rightName]);
+                }
+            }
+
+            return ($"{puzzle1}", $"{puzzle2}");
         }
 
         private class CoordinateEncryptionNode
