@@ -17,5 +17,5 @@ foreach (var group in solutionTypesByYear)
     }
 }
 
-var puzzles = new Puzzles2022();
-await puzzles.SolveAsync();
+//var puzzles = new Puzzles2022();
+//await puzzles.SolveAsync();

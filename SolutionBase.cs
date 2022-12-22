@@ -32,25 +32,25 @@ namespace Moyba.AdventOfCode
 
         public async Task SolveAsync()
         {
-            var overallStopwatch = new Stopwatch();
+            var overallStopwatch = Stopwatch.StartNew();
             Console.WriteLine();
 
             Console.Write($"Year {_year}, Day {_day}");
 
-            var stopwatch = new Stopwatch();
+            var stopwatch = Stopwatch.StartNew();
             var input = await this.ReadInputFileAsync();
             var data = this.ReadInput(input);
             Console.Write($" [R: {stopwatch.ElapsedMilliseconds}");
 
-            stopwatch = new Stopwatch();
+            stopwatch = Stopwatch.StartNew();
             this.TransformData(data);
             Console.Write($", T: {stopwatch.ElapsedMilliseconds}");
 
-            stopwatch = new Stopwatch();
+            stopwatch = Stopwatch.StartNew();
             var part1 = this.SolvePart1();
             Console.Write($", 1: {stopwatch.ElapsedMilliseconds}");
 
-            stopwatch = new Stopwatch();
+            stopwatch = Stopwatch.StartNew();
             var part2 = this.SolvePart2();
             Console.WriteLine($", 2: {stopwatch.ElapsedMilliseconds}] ({overallStopwatch.Elapsed})");
 
