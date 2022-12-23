@@ -1,0 +1,23 @@
+using System.Text.RegularExpressions;
+
+namespace Moyba.AdventOfCode.Year20XX
+{
+    public class DayXX : SolutionBase
+    {
+        private string[] _data = Array.Empty<string>();
+
+        [Expect()]
+        protected override string SolvePart1()
+        {
+            return $"";
+        }
+
+        [Expect()]
+        protected override string SolvePart2()
+        {
+            return $"";
+        }
+
+        protected override void TransformData(IEnumerable<string> data) => _data = data.ToArray();
+    }
+}
