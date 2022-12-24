@@ -63,6 +63,17 @@ namespace Moyba.AdventOfCode
         protected abstract string SolvePart1();
         protected abstract string SolvePart2();
 
+        protected static long _GCD(long a, long b)
+        {
+            if (b == 0) return a;
+            return _GCD(b, a % b);
+        }
+
+        protected static long _LCM(long a, long b)
+        {
+            return a * b / _GCD(a, b);
+        }
+
         private async Task<IEnumerable<string>> ReadInputFileAsync()
         {
             // check whether the file already exists
