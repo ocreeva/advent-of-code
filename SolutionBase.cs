@@ -7,6 +7,7 @@ namespace Moyba.AdventOfCode
     public abstract class SolutionBase<T> : ISolution
     {
         private static readonly ExpectAttribute DefaultExpect = new ExpectAttribute();
+        protected static readonly int ParallelThreads = 16;
 
         private readonly Type _type;
         private readonly int _day, _year;
@@ -54,8 +55,8 @@ namespace Moyba.AdventOfCode
             var part2 = this.SolvePart2();
             Console.WriteLine($", 2: {stopwatch.ElapsedMilliseconds}] ({overallStopwatch.Elapsed})");
 
-            (_type.GetMethod(nameof(SolvePart1))?.GetCustomAttribute<ExpectAttribute>() ?? DefaultExpect).ValidateAndDisplay(1, part1);
-            (_type.GetMethod(nameof(SolvePart2))?.GetCustomAttribute<ExpectAttribute>() ?? DefaultExpect).ValidateAndDisplay(2, part2);
+            (_type.GetMethod(nameof(SolvePart1), BindingFlags.Instance | BindingFlags.NonPublic)?.GetCustomAttribute<ExpectAttribute>() ?? DefaultExpect).ValidateAndDisplay(1, part1);
+            (_type.GetMethod(nameof(SolvePart2), BindingFlags.Instance | BindingFlags.NonPublic)?.GetCustomAttribute<ExpectAttribute>() ?? DefaultExpect).ValidateAndDisplay(2, part2);
         }
 
         protected abstract T ReadInput(IEnumerable<string> input);

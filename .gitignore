@@ -1,6 +1,9 @@
 # Ignore vscode.
 /.vscode/
 
+# Ignore the solution file.
+/*.sln
+
 # Ignore build artifacts.
 /bin/
 /obj/
@@ -17,3 +20,4 @@
 /2020/
 /2021/
 /2022/
+/2023/
