@@ -1,11 +1,13 @@
 using System.Text.RegularExpressions;
+using Reindeer = (string name, int speed, int duration, int rest);
 
 namespace Moyba.AdventOfCode.Year2015
 {
     public class Day14 : SolutionBase
     {
         private static readonly Regex Parser = new Regex(@"^(.+) can fly (\d+) km/s for (\d+) seconds?, but then must rest for (\d+) seconds?\.$", RegexOptions.Compiled);
-        private (string name, int speed, int duration, int rest)[] _data = Array.Empty<(string, int, int, int)>();
+
+        private Reindeer[] _reindeer = Array.Empty<Reindeer>();
         private int[][] _distances = Array.Empty<int[]>();
 
         [Expect("2640")]
@@ -35,32 +37,22 @@ namespace Moyba.AdventOfCode.Year2015
 
         protected override void TransformData(IEnumerable<string> data)
         {
-            _data = data
-                .Select(_ => Parser.Match(_))
-                .Where(match => match.Success)
-                .Select(match => {
-                    var name = match.Groups[1].Value;
-                    var speed = Int32.Parse(match.Groups[2].Value);
-                    var duration = Int32.Parse(match.Groups[3].Value);
-                    var rest = Int32.Parse(match.Groups[4].Value);
-                    return (name, speed, duration, rest);
-                })
-                .ToArray();
+            _reindeer = Parser.TransformData<Reindeer>(data).ToArray();
 
-            _distances = new int[_data.Length][];
+            _distances = new int[_reindeer.Length][];
             for (var index = 0; index < _distances.Length; index++)
             {
                 _distances[index] = new int[2503];
                 
                 var distance = 0;
                 var time = 0;
-                var remainingDuration = _data[index].duration;
-                var remainingRest = _data[index].rest;
+                var remainingDuration = _reindeer[index].duration;
+                var remainingRest = _reindeer[index].rest;
                 while (time < 2503)
                 {
                     if (remainingDuration > 0)
                     {
-                        distance += _data[index].speed;
+                        distance += _reindeer[index].speed;
                         remainingDuration--;
                     }
                     else
@@ -68,8 +60,8 @@ namespace Moyba.AdventOfCode.Year2015
                         remainingRest--;
                         if (remainingRest == 0)
                         {
-                            remainingDuration = _data[index].duration;
-                            remainingRest = _data[index].rest;
+                            remainingDuration = _reindeer[index].duration;
+                            remainingRest = _reindeer[index].rest;
                         }
                     }
 
