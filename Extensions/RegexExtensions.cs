@@ -14,7 +14,7 @@ namespace System.Text.RegularExpressions
             foreach (var line in data)
             {
                 var match = regex.Match(line);
-                if (!match.Success) throw new Exception($"Regex ({regex}) unable to parse data: {line}");
+                if (!match.Success) throw new Exception($"Regex ({regex}) unable to transform data: {line}");
 
                 for (var index = 0; index < parameters.Length; index++)
                 {
@@ -22,6 +22,10 @@ namespace System.Text.RegularExpressions
                     var value = match.Groups[index + 1].Value;
                     switch (parameter.ParameterType.FullName)
                     {
+                        case "System.Char":
+                            arguments[index] = value.Single();
+                            break;
+
                         case "System.Int32":
                             arguments[index] = Int32.Parse(value);
                             break;
