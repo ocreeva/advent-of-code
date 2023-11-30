@@ -1,30 +1,33 @@
 namespace Moyba.AdventOfCode.Year2015
 {
-    public class Day1 : SolutionBase<string>
+    public class Day1(IEnumerable<string> data) : IPuzzle
     {
-        private int[] _data = Array.Empty<int>();
+        private readonly int[] _data = data.Single().Select(c => 2 * ('(' - c) + 1).ToArray();
 
-        protected override string ReadInput(IEnumerable<string> input) => input.First();
+        private int _finalFloor;
+        private int? _firstBasementPosition;
 
-        [Expect("138")]
-        protected override string SolvePart1()
+        public Task ComputeAsync()
         {
-            return $"{_data.Sum()}";
-        }
-
-        [Expect("1771")]
-        protected override string SolvePart2()
-        {
-            var floor = 0;
             for (var index = 0; index < _data.Length; index++)
             {
-                floor += _data[index];
-                if (floor < 0) return $"{index + 1}";
+                _finalFloor += _data[index];
+                if (!_firstBasementPosition.HasValue && (_finalFloor < 0)) _firstBasementPosition = index + 1;
             }
 
-            throw new Exception("Unexpected end of data with no solution.");
+            return Task.CompletedTask;
         }
 
-        protected override void TransformData(string data) => _data = data.Select(c => 2 * ('(' - c) + 1).ToArray();
+        [Solution("138")]
+        public string SolvePartOne()
+        {
+            return $"{_finalFloor}";
+        }
+
+        [Solution("1771")]
+        public string SolvePartTwo()
+        {
+            return $"{_firstBasementPosition}";
+        }
     }
 }
