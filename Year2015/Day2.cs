@@ -1,26 +1,32 @@
+using Present = (long maxDimension, long minArea, long minPerimeter);
+
 namespace Moyba.AdventOfCode.Year2015
 {
-    public class Day2 : SolutionBase
+    public class Day2(IEnumerable<string> data) : IPuzzle
     {
-        private (int x, int y, int z)[] _data = Array.Empty<(int, int, int)>();
-
-        [Expect("1598415")]
-        protected override string SolvePart1()
-        {
-            var paper = _data.Sum(d => 3 * d.x * d.y + 2 * (d.x * d.z + d.y * d.z));
-            return $"{paper}";
-        }
-
-        [Expect("3812909")]
-        protected override string SolvePart2()
-        {
-            var ribbon = _data.Sum(d => 2 * (d.x + d.y) + d.x * d.y * d.z);
-            return $"{ribbon}";
-        }
-
-        protected override void TransformData(IEnumerable<string> data) => _data = data
-            .Select(s => s.Split('x').Select(Int32.Parse).Order().ToArray())
-            .Select(x => (x[0], x[1], x[2]))
+        private readonly Present[] _presents = data
+            .Select(_ => _.Split('x').Select(Int64.Parse).Order().ToArray())
+            .Select(_ => (_[2], _[0] * _[1], _[0] + _[1]))
             .ToArray();
+
+        private long _paper;
+        private long _ribbon;
+
+        public Task ComputeAsync()
+        {
+            foreach ((var maxDimension, var minArea, var minPerimeter) in _presents)
+            {
+                _paper += 3 * minArea + 2 * minPerimeter * maxDimension;
+                _ribbon += 2 * minPerimeter + minArea * maxDimension;
+            }
+
+            return Task.CompletedTask;
+        }
+
+        [Solution("1598415")]
+        public string SolvePartOne() => $"{_paper}";
+
+        [Solution("3812909")]
+        public string SolvePartTwo() => $"{_ribbon}";
     }
 }
