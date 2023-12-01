@@ -60,7 +60,7 @@ namespace Moyba.AdventOfCode
                 times.Add(('R', stopwatch.ElapsedMilliseconds));
 
                 stopwatch = Stopwatch.StartNew();
-                var puzzle = (IPuzzle)constructor.Invoke([ data ]);
+                var puzzle = (IPuzzle)constructor.Invoke([ data.ToArray() ]);
                 times.Add(('T', stopwatch.ElapsedMilliseconds));
 
                 stopwatch = Stopwatch.StartNew();
@@ -75,7 +75,7 @@ namespace Moyba.AdventOfCode
                 var partTwo = puzzle.SolvePartTwo();
                 times.Add(('2', stopwatch.ElapsedMilliseconds));
 
-                var serializedTimes = String.Join(", ", times.Where(t => t.time > 1).Select(_ => $"{_.code}: {_.time}"));
+                var serializedTimes = String.Join(", ", times.Where(t => !Char.IsDigit(t.code) || t.time > 1).Select(_ => $"{_.code}: {_.time}"));
                 Console.WriteLine($"Year {year}, Day {day} [{serializedTimes}] ({overallStopwatch.Elapsed})");
                 validatePartOne(partOne);
                 validatePartTwo(partTwo);
