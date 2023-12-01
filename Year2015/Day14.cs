@@ -1,3 +1,4 @@
+using System.Collection.Generic;
 using System.Text.RegularExpressions;
 using Reindeer = (string name, int speed, int duration, int rest);
 
@@ -37,7 +38,7 @@ namespace Moyba.AdventOfCode.Year2015
 
         protected override void TransformData(IEnumerable<string> data)
         {
-            _reindeer = Parser.TransformData<Reindeer>(data).ToArray();
+            _reindeer = data.Transform<Reindeer>(Parser).ToArray();
 
             _distances = new int[_reindeer.Length][];
             for (var index = 0; index < _distances.Length; index++)
