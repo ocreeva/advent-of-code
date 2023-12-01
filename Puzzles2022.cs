@@ -11,7 +11,6 @@ namespace Moyba.AdventOfCode
 
         public override async Task SolveAsync()
         {
-            await this.SolveAsync(() => Puzzles2022.Day1, LineDelimited, AsBatchesOfLongs);
             await this.SolveAsync(() => Puzzles2022.Day2);
             await this.SolveAsync(() => Puzzles2022.Day3);
             await this.SolveAsync(() => Puzzles2022.Day4, LineDelimited, new Regex(@"(?<Min1>\d+)\-(?<Max1>\d+),(?<Min2>\d+)-(?<Max2>\d+)"));
@@ -1482,17 +1481,6 @@ namespace Moyba.AdventOfCode
             }
 
             return ($"{score1}", $"{score2}");
-        }
-
-        [Answer("71924", "210406")]
-        private static (string, string) Day1(IEnumerable<IEnumerable<long>> input)
-        {
-            var top3 = input
-                .Select(batch => batch.Sum())
-                .OrderByDescending(x => x)
-                .Take(3);
-
-            return ($"{top3.First()}", $"{top3.Sum()}");
         }
     }
 }

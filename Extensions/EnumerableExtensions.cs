@@ -14,6 +14,24 @@ namespace System.Collection.Generic
             }
         }
 
+        public static IEnumerable<IEnumerable<string>> Cluster(this IEnumerable<string> enumerable)
+        {
+            using (var enumerator = enumerable.GetEnumerator())
+            {
+                while (enumerator.MoveNext()) yield return _ClusterGroup(enumerator);
+            }
+        }
+
+        private static IEnumerable<string> _ClusterGroup(IEnumerator<string> enumerator)
+        {
+            do
+            {
+                if (String.IsNullOrEmpty(enumerator.Current)) yield break;
+                yield return enumerator.Current;
+            }
+            while (enumerator.MoveNext());
+        }
+
         public static IEnumerable<T> Transform<T>(this IEnumerable<string> enumerable, Regex regex)
         {
             var type = typeof(T);
