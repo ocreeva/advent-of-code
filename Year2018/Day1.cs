@@ -1,25 +1,52 @@
 namespace Moyba.AdventOfCode.Year2018
 {
-    public class Day1 : SolutionBase<IEnumerable<long>>
+    public class Day1(IEnumerable<string> data) : IPuzzle
     {
-        private long[] _data = Array.Empty<long>();
+        private readonly long[] _data = data.Select(Int64.Parse).ToArray();
 
-        protected override IEnumerable<long> ReadInput(IEnumerable<string> input) => input.Select(Int64.Parse);
+        private long _frequency;
+        private long? _duplicate;
 
-        [Expect("547")]
-        protected override string SolvePart1() => $"{_data.Sum()}";
-
-        [Expect("76414")]
-        protected override string SolvePart2()
+        public Task ComputeAsync()
         {
-            var frequency = 0L;
-            var frequencies = new HashSet<long>();
+            var reached = new HashSet<long> { _frequency };
 
-            for (var index = 0; !frequencies.Contains(frequency); frequency += _data[index++ % _data.Length]) frequencies.Add(frequency);
+            for (var index = 0; index < _data.Length; index++)
+            {
+                _frequency += _data[index];
 
-            return $"{frequency}";
+                if (reached.Contains(_frequency) && !_duplicate.HasValue)
+                {
+                    _duplicate = _frequency;
+                }
+
+                reached.Add(_frequency);
+            }
+
+            var frequency = _frequency;
+            while (!_duplicate.HasValue)
+            {
+                for (var index = 0; index < _data.Length; index++)
+                {
+                    frequency += _data[index];
+
+                    if (reached.Contains(frequency))
+                    {
+                        _duplicate = frequency;
+                        break;
+                    }
+
+                    reached.Add(frequency);
+                }
+            }
+
+            return Task.CompletedTask;
         }
 
-        protected override void TransformData(IEnumerable<long> data) => _data = data.ToArray();
+        [Solution("547")]
+        public string SolvePartOne() => $"{_frequency}";
+
+        [Solution("76414")]
+        public string SolvePartTwo() => $"{_duplicate}";
     }
 }
