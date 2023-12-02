@@ -49,17 +49,13 @@ namespace Moyba.AdventOfCode
         {
             foreach ((var year, var day, var constructor, var validatePartOne, var validatePartTwo) in _puzzles)
             {
-                var times = new List<(char code, long time)>(5);
+                var data = await this.ReadInputFileAsync(year, day);
+                Console.WriteLine();
+
+                var times = new List<(char code, long time)>(4);
                 var overallStopwatch = Stopwatch.StartNew();
 
-                Console.WriteLine();
-                Console.Write($"");
-
                 var stopwatch = Stopwatch.StartNew();
-                var data = await this.ReadInputFileAsync(year, day);
-                times.Add(('R', stopwatch.ElapsedMilliseconds));
-
-                stopwatch = Stopwatch.StartNew();
                 var puzzle = (IPuzzle)constructor.Invoke([ data.ToArray() ]);
                 times.Add(('T', stopwatch.ElapsedMilliseconds));
 
