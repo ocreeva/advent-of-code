@@ -44,9 +44,9 @@ namespace Moyba.AdventOfCode.Year2018
         }
 
         [Solution("547")]
-        public string SolvePartOne() => $"{_frequency}";
+        public string PartOne => $"{_frequency}";
 
         [Solution("76414")]
-        public string SolvePartTwo() => $"{_duplicate}";
+        public string PartTwo => $"{_duplicate}";
     }
 }

@@ -24,9 +24,9 @@ namespace Moyba.AdventOfCode.Year2015
         }
 
         [Solution("1598415")]
-        public string SolvePartOne() => $"{_paper}";
+        public string PartOne => $"{_paper}";
 
         [Solution("3812909")]
-        public string SolvePartTwo() => $"{_ribbon}";
+        public string PartTwo => $"{_ribbon}";
     }
 }

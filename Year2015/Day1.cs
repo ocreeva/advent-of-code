@@ -35,9 +35,9 @@ namespace Moyba.AdventOfCode.Year2015
         }
 
         [Solution("138")]
-        public string SolvePartOne() => $"{_finalFloor}";
+        public string PartOne => $"{_finalFloor}";
 
         [Solution("1771")]
-        public string SolvePartTwo() => $"{_firstBasementPosition}";
+        public string PartTwo => $"{_firstBasementPosition}";
     }
 }

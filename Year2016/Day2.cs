@@ -64,9 +64,9 @@ namespace Moyba.AdventOfCode.Year2016
         }
 
         [Solution("48584")]
-        public string SolvePartOne() => String.Join("", _partOneCode);
+        public string PartOne => String.Join("", _partOneCode);
 
         [Solution("563B6")]
-        public string SolvePartTwo() => String.Join("", _partTwoCode);
+        public string PartTwo => String.Join("", _partTwoCode);
     }
 }

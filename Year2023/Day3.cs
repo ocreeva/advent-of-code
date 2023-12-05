@@ -48,10 +48,10 @@ namespace Moyba.AdventOfCode.Year2023
         }
 
         [Solution("556367")]
-        public string SolvePartOne() => $"{_sumOfParts}";
+        public string PartOne => $"{_sumOfParts}";
 
         [Solution("89471771")]
-        public string SolvePartTwo() => $"{_gearRatios}";
+        public string PartTwo => $"{_gearRatios}";
 
         private IEnumerable<(char value, Coord location)> FindAdjacentSymbols(int lineIndex, int startIndex, int endIndex)
         {

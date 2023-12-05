@@ -20,9 +20,9 @@ namespace Moyba.AdventOfCode.Year2022
         }
 
         [Solution("71924")]
-        public string SolvePartOne() => $"{_maxCalories}";
+        public string PartOne => $"{_maxCalories}";
 
         [Solution("210406")]
-        public string SolvePartTwo() => $"{_maxCaloriesForThree}";
+        public string PartTwo => $"{_maxCaloriesForThree}";
     }
 }

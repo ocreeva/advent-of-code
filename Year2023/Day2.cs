@@ -52,10 +52,10 @@ namespace Moyba.AdventOfCode.Year2023
         }
 
         [Solution("2268")]
-        public string SolvePartOne() => $"{_possibleGames}";
+        public string PartOne => $"{_possibleGames}";
 
         [Solution("63542")]
-        public string SolvePartTwo() => $"{_minimumCubes}";
+        public string PartTwo => $"{_minimumCubes}";
 
         private static int _GetColorIndex(string color) => color switch
         {

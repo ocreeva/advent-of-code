@@ -36,10 +36,10 @@ namespace Moyba.AdventOfCode.Year2023
         }
 
         [Solution("54968")]
-        public string SolvePartOne() => $"{_numericCalibration}";
+        public string PartOne => $"{_numericCalibration}";
 
         [Solution("54094")]
-        public string SolvePartTwo() => $"{_digitCalibration}";
+        public string PartTwo => $"{_digitCalibration}";
 
         private static (int digit, bool isNumeric) _DigitLookup(string s) => s switch
         {

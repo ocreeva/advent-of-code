@@ -52,15 +52,18 @@ namespace Moyba.AdventOfCode.Year2016
         }
 
         [Solution("307")]
-        public string SolvePartOne() => $"{Math.Abs(_position.x) + Math.Abs(_position.y)}";
+        public string PartOne => $"{Math.Abs(_position.x) + Math.Abs(_position.y)}";
 
         [Solution("165")]
-        public string SolvePartTwo()
+        public string PartTwo
         {
-            if (_duplicate == null) throw new Exception("Duplicate coordinate not found.");
+            get
+            {
+                if (_duplicate == null) throw new Exception("Duplicate coordinate not found.");
 
-            var location = _duplicate.Value;
-            return $"{Math.Abs(location.x) + Math.Abs(location.y)}";
+                var location = _duplicate.Value;
+                return $"{Math.Abs(location.x) + Math.Abs(location.y)}";
+            }
         }
     }
 }

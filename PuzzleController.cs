@@ -36,8 +36,8 @@ namespace Moyba.AdventOfCode
                     var constructor = t.GetConstructor(_PuzzleConstructorTypes);
                     if (constructor == null) throw new Exception($"Puzzle '{name}' does not follow the convention for constructor signatures.");
 
-                    var partOne = (t.GetMethod(nameof(IPuzzle.SolvePartOne))?.GetCustomAttribute<SolutionAttribute>() ?? _DefaultSolution).GetValidator("One");
-                    var partTwo = (t.GetMethod(nameof(IPuzzle.SolvePartTwo))?.GetCustomAttribute<SolutionAttribute>() ?? _DefaultSolution).GetValidator("Two");
+                    var partOne = (t.GetMethod(nameof(IPuzzle.PartOne))?.GetCustomAttribute<SolutionAttribute>() ?? _DefaultSolution).GetValidator("One");
+                    var partTwo = (t.GetMethod(nameof(IPuzzle.PartTwo))?.GetCustomAttribute<SolutionAttribute>() ?? _DefaultSolution).GetValidator("Two");
 
                     return (year, day, constructor, partOne, partTwo);
                 })
@@ -63,18 +63,10 @@ namespace Moyba.AdventOfCode
                 await puzzle.ComputeAsync();
                 times.Add(('C', stopwatch.ElapsedMilliseconds));
 
-                stopwatch = Stopwatch.StartNew();
-                var partOne = puzzle.SolvePartOne();
-                times.Add(('1', stopwatch.ElapsedMilliseconds));
-
-                stopwatch = Stopwatch.StartNew();
-                var partTwo = puzzle.SolvePartTwo();
-                times.Add(('2', stopwatch.ElapsedMilliseconds));
-
                 var serializedTimes = String.Join(", ", times.Where(t => !Char.IsDigit(t.code) || t.time > 1).Select(_ => $"{_.code}: {_.time}"));
                 Console.WriteLine($"Year {year}, Day {day} [{serializedTimes}] ({overallStopwatch.Elapsed})");
-                validatePartOne(partOne);
-                validatePartTwo(partTwo);
+                validatePartOne(puzzle.PartOne);
+                validatePartTwo(puzzle.PartTwo);
             }
         }
 
@@ -109,7 +101,7 @@ namespace Moyba.AdventOfCode
         }
     }
 
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Property)]
     public class SolutionAttribute(string? value = null) : Attribute
     {
         private readonly string? _value = value;
@@ -134,7 +126,7 @@ namespace Moyba.AdventOfCode
     public interface IPuzzle
     {
         Task ComputeAsync();
-        string SolvePartOne();
-        string SolvePartTwo();
+        string PartOne { get; }
+        string PartTwo { get; }
     }
 }

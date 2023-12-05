@@ -30,10 +30,10 @@ namespace Moyba.AdventOfCode.Year2018
         }
 
         [Solution("7936")]
-        public string SolvePartOne() => $"{_checksum}";
+        public string PartOne => $"{_checksum}";
 
         [Solution("lnfqdscwjyteorambzuchrgpx")]
-        public string SolvePartTwo() => _prototypeID ?? String.Empty;
+        public string PartTwo => _prototypeID ?? String.Empty;
 
         private class TrieNode(int index = -1, int _ignoreIndex = -1, char[]? _initial = null)
         {

@@ -43,9 +43,9 @@ namespace Moyba.AdventOfCode.Year2023
         }
 
         [Solution("15205")]
-        public string SolvePartOne() => $"{_points}";
+        public string PartOne => $"{_points}";
 
         [Solution("6189740")]
-        public string SolvePartTwo() => $"{_totalCards}";
+        public string PartTwo => $"{_totalCards}";
     }
 }

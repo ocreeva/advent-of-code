@@ -90,10 +90,10 @@ namespace Moyba.AdventOfCode.Year2023
         }
 
         [Solution("662197086")]
-        public string SolvePartOne() => $"{_singleSeedLocation}";
+        public string PartOne => $"{_singleSeedLocation}";
 
         [Solution("52510809")]
-        public string SolvePartTwo() => $"{_multiSeedLocation}";
+        public string PartTwo => $"{_multiSeedLocation}";
 
         private static void _UtilizeAlmanac(SortedList<long, (long end, long offset)> conversions, SortedList<long, long> sourceRanges, SortedList<long, long> targetRanges)
         {
