@@ -4,18 +4,15 @@ namespace Moyba.AdventOfCode.Year20XX
     {
         private readonly string[] _data = data.ToArray();
 
-        private string _partOne;
-        private string _partTwo;
-
         public Task ComputeAsync()
         {
             return Task.CompletedTask;
         }
 
         [Solution()]
-        public string SolvePartOne() => $"{_partOne}";
+        public string PartOne { get; private set; }
 
         [Solution()]
-        public string SolvePartTwo() => $"{_partTwo}";
+        public string PartTwo { get; private set; }
     }
 }
