@@ -1,9 +1,7 @@
 namespace Moyba.AdventOfCode.Year20XX
 {
-    public class DayXX(IEnumerable<string> data) : IPuzzle
+    public class DayXX(string[] _data) : IPuzzle
     {
-        private readonly string[] _data = data.ToArray();
-
         public Task ComputeAsync()
         {
             return Task.CompletedTask;

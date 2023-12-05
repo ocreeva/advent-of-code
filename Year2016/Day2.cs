@@ -1,6 +1,6 @@
 namespace Moyba.AdventOfCode.Year2016
 {
-    public class Day2(IEnumerable<string> data) : IPuzzle
+    public class Day2(string[] data) : IPuzzle
     {
         // U, L, R, D
         private static readonly IDictionary<char, char[]> _PartOneLookup = new Dictionary<char, char[]>

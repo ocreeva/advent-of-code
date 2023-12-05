@@ -2,7 +2,7 @@ using Present = (long maxDimension, long minArea, long minPerimeter);
 
 namespace Moyba.AdventOfCode.Year2015
 {
-    public class Day2(IEnumerable<string> data) : IPuzzle
+    public class Day2(string[] data) : IPuzzle
     {
         private readonly Present[] _presents = data
             .Select(_ => _.Split('x').Select(Int64.Parse).Order().ToArray())

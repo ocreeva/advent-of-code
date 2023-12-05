@@ -2,7 +2,7 @@ namespace Moyba.AdventOfCode.Year2023
 {
     using Card = (int index, int[] winning, int[] numbers);
 
-    public class Day4(IEnumerable<string> data) : IPuzzle
+    public class Day4(string[] data) : IPuzzle
     {
         private readonly Card[] _cards = data
             .Select(_ => {

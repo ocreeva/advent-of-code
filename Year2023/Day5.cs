@@ -14,23 +14,21 @@ namespace Moyba.AdventOfCode.Year2023
         private long _singleSeedLocation;
         private long _multiSeedLocation;
 
-        public Day5(IEnumerable<string> data)
+        public Day5(string[] data)
         {
-            var lines = data.ToArray();
+            _seeds = data[0].Split(' ').Skip(1).Select(Int64.Parse).ToArray();
 
-            _seeds = lines[0].Split(' ').Skip(1).Select(Int64.Parse).ToArray();
-
-            for (var index = 2; index < lines.Length; index++)
+            for (var index = 2; index < data.Length; index++)
             {
-                var match = _CategoryParser.Match(lines[index]);
-                if (!match.Success) throw new Exception($"Unexpected failure to parse category: {lines[index]}");
+                var match = _CategoryParser.Match(data[index]);
+                if (!match.Success) throw new Exception($"Unexpected failure to parse category: {data[index]}");
 
                 var sourceCategory = match.Groups[1].Value;
                 var targetCategory = match.Groups[2].Value;
                 var conversions = new SortedList<long, (long, long)>();
-                for (index++; index < lines.Length; index++)
+                for (index++; index < data.Length; index++)
                 {
-                    var line = lines[index];
+                    var line = data[index];
                     if (String.IsNullOrEmpty(line)) break;
 
                     // target start, source start, range

@@ -3,7 +3,7 @@ using Instruction = (char turn, int distance);
 
 namespace Moyba.AdventOfCode.Year2016
 {
-    public class Day1(IEnumerable<string> data) : IPuzzle
+    public class Day1(string[] data) : IPuzzle
     {
         private static readonly IDictionary<char, Func<Coord, Coord>> _TurnLookup = new Dictionary<char, Func<Coord, Coord>>
         {

@@ -1,6 +1,6 @@
 namespace Moyba.AdventOfCode.Year2018
 {
-    public class Day1(IEnumerable<string> data) : IPuzzle
+    public class Day1(string[] data) : IPuzzle
     {
         private readonly long[] _data = data.Select(Int64.Parse).ToArray();
 

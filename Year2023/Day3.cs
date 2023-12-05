@@ -2,10 +2,9 @@ namespace Moyba.AdventOfCode.Year2023
 {
     using Coord = (int x, int y);
 
-    public class Day3(IEnumerable<string> data) : IPuzzle
+    public class Day3(string[] _data) : IPuzzle
     {
-        private readonly string[] _data = data.ToArray();
-        private readonly int _lineLength = data.First().Length;
+        private readonly int _lineLength = _data[0].Length;
 
         private int _sumOfParts;
         private int _gearRatios;

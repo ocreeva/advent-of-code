@@ -2,7 +2,7 @@ namespace Moyba.AdventOfCode.Year2023
 {
     using Game = (int number, int[][] rounds);
 
-    public class Day2(IEnumerable<string> data) : IPuzzle
+    public class Day2(string[] data) : IPuzzle
     {
         private const int _RedIndex = 0;
         private const int _GreenIndex = 1;

@@ -2,7 +2,7 @@ using System.Collection.Generic;
 
 namespace Moyba.AdventOfCode.Year2022
 {
-    public class Day1(IEnumerable<string> data) : IPuzzle
+    public class Day1(string[] data) : IPuzzle
     {
         private readonly long[][] _elves = data.Cluster().Select(_ => _.Select(Int64.Parse).ToArray()).ToArray();
 

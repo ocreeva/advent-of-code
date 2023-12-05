@@ -2,12 +2,10 @@ using System.Text.RegularExpressions;
 
 namespace Moyba.AdventOfCode.Year2023
 {
-    public class Day1(IEnumerable<string> data) : IPuzzle
+    public class Day1(string[] _data) : IPuzzle
     {
         private static readonly Regex _LeadNumberParser = new Regex(@"\d|one|two|three|four|five|six|seven|eight|nine", RegexOptions.Compiled);
         private static readonly Regex _TailNumberParser = new Regex(@"\d|one|two|three|four|five|six|seven|eight|nine", RegexOptions.Compiled | RegexOptions.RightToLeft);
-
-        private readonly string[] _data = data.ToArray();
 
         private int _numericCalibration;
         private int _digitCalibration;

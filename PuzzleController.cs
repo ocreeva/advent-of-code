@@ -8,7 +8,7 @@ namespace Moyba.AdventOfCode
 
     public class PuzzleController
     {
-        private static readonly Type[] _PuzzleConstructorTypes = [ typeof(IEnumerable<string>) ];
+        private static readonly Type[] _PuzzleConstructorTypes = [ typeof(string[]) ];
         private static readonly SolutionAttribute _DefaultSolution = new SolutionAttribute();
         private static readonly Regex _EndsWithNumberRegex = new Regex(@"[^\d](?<Number>\d+)$", RegexOptions.Compiled);
 
