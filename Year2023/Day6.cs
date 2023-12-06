@@ -32,7 +32,7 @@ namespace Moyba.AdventOfCode.Year2023
         [Solution("393120")]
         public string PartOne => $"{_productOfOptions}";
 
-        [Solution()]
+        [Solution("36872656")]
         public string PartTwo => $"{_longerOptions}";
 
         private static long _FindWinningOptions(long time, long distance)
