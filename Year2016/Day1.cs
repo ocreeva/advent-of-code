@@ -1,8 +1,8 @@
-using Coord = (int x, int y);
-using Instruction = (char turn, int distance);
-
 namespace Moyba.AdventOfCode.Year2016
 {
+    using Coord = (int x, int y);
+    using Instruction = (char turn, int distance);
+
     public class Day1(string[] data) : IPuzzle
     {
         private static readonly IDictionary<char, Func<Coord, Coord>> _TurnLookup = new Dictionary<char, Func<Coord, Coord>>
@@ -17,11 +17,15 @@ namespace Moyba.AdventOfCode.Year2016
             .Select<string, Instruction>(_ => (_[0], Int32.Parse(_[1..])))
             .ToArray();
 
-        private Coord _position = (0, 0);
-        private Coord? _duplicate;
 
-        public Task ComputeAsync()
+        [PartOne("307")]
+        [PartTwo("165")]
+        public async IAsyncEnumerable<string> ComputeAsync()
         {
+            Coord position = (0, 0);
+            Coord duplicate = (0, 0);
+            bool foundDuplicate = false;
+
             var visited = new HashSet<Coord>();
             Coord direction = (0, 1);
 
@@ -30,40 +34,30 @@ namespace Moyba.AdventOfCode.Year2016
                 direction = _TurnLookup[turn](direction);
 
                 var step = 0;
-                if (!_duplicate.HasValue)
+                if (!foundDuplicate)
                 {
                     while (step++ < distance)
                     {
-                        _position = (_position.x + direction.x, _position.y + direction.y);
-                        if (visited.Contains(_position))
+                        position = (position.x + direction.x, position.y + direction.y);
+                        if (visited.Contains(position))
                         {
-                            _duplicate = _position;
+                            foundDuplicate = true;
+                            duplicate = position;
                             break;
                         }
 
-                        visited.Add(_position);
+                        visited.Add(position);
                     }
                 }
 
-                while (step++ < distance) _position = (_position.x + direction.x, _position.y + direction.y);
+                while (step++ < distance) position = (position.x + direction.x, position.y + direction.y);
             }
 
-            return Task.CompletedTask;
-        }
+            yield return $"{Math.Abs(position.x) + Math.Abs(position.y)}";
 
-        [Solution("307")]
-        public string PartOne => $"{Math.Abs(_position.x) + Math.Abs(_position.y)}";
+            yield return $"{Math.Abs(duplicate.x) + Math.Abs(duplicate.y)}";
 
-        [Solution("165")]
-        public string PartTwo
-        {
-            get
-            {
-                if (_duplicate == null) throw new Exception("Duplicate coordinate not found.");
-
-                var location = _duplicate.Value;
-                return $"{Math.Abs(location.x) + Math.Abs(location.y)}";
-            }
+            await Task.CompletedTask;
         }
     }
 }

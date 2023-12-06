@@ -13,31 +13,32 @@ namespace Moyba.AdventOfCode.Year2015
             .Select(_ => _DataLookup[_])
             .ToArray();
 
-        private int _finalFloor;
-        private int? _firstBasementPosition;
 
-        public Task ComputeAsync()
+        [PartOne("138")]
+        [PartTwo("1771")]
+        public async IAsyncEnumerable<string> ComputeAsync()
         {
+            var finalFloor = 0;
+            var firstBasementPosition = 0;
+
             var index = 0;
             while (index < _data.Length)
             {
-                _finalFloor += _data[index++];
-                if (_finalFloor < 0)
+                finalFloor += _data[index++];
+                if (finalFloor < 0)
                 {
-                    _firstBasementPosition = index;
+                    firstBasementPosition = index;
                     break;
                 }
             }
 
-            while (index < _data.Length) _finalFloor += _data[index++];
+            while (index < _data.Length) finalFloor += _data[index++];
 
-            return Task.CompletedTask;
+            yield return $"{finalFloor}";
+
+            yield return $"{firstBasementPosition}";
+
+            await Task.CompletedTask;
         }
-
-        [Solution("138")]
-        public string PartOne => $"{_finalFloor}";
-
-        [Solution("1771")]
-        public string PartTwo => $"{_firstBasementPosition}";
     }
 }

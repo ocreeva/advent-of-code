@@ -4,12 +4,12 @@ using System.Text.RegularExpressions;
 
 namespace Moyba.AdventOfCode
 {
-    using PuzzleInfo = (int year, int day, ConstructorInfo constructor, Action<string> validatePartOne, Action<string> validatePartTwo);
+    using PuzzleInfo = (int year, int day, ConstructorInfo constructor, IDictionary<int, SolutionAttribute> validators);
 
     public class PuzzleController
     {
         private static readonly Type[] _PuzzleConstructorTypes = [ typeof(string[]) ];
-        private static readonly SolutionAttribute _DefaultSolution = new SolutionAttribute();
+        private static readonly IDictionary<int, SolutionAttribute> _EmptyValidators = new Dictionary<int, SolutionAttribute>();
         private static readonly Regex _EndsWithNumberRegex = new Regex(@"[^\d](?<Number>\d+)$", RegexOptions.Compiled);
 
         private readonly IEnumerable<PuzzleInfo> _puzzles;
@@ -36,10 +36,9 @@ namespace Moyba.AdventOfCode
                     var constructor = t.GetConstructor(_PuzzleConstructorTypes);
                     if (constructor == null) throw new Exception($"Puzzle '{name}' does not follow the convention for constructor signatures.");
 
-                    var partOne = (t.GetMethod(nameof(IPuzzle.PartOne))?.GetCustomAttribute<SolutionAttribute>() ?? _DefaultSolution).GetValidator("One");
-                    var partTwo = (t.GetMethod(nameof(IPuzzle.PartTwo))?.GetCustomAttribute<SolutionAttribute>() ?? _DefaultSolution).GetValidator("Two");
+                    var validators = t.GetMethod(nameof(IPuzzle.ComputeAsync))?.GetCustomAttributes<SolutionAttribute>().ToDictionary(_ => _.Part) ?? _EmptyValidators;
 
-                    return (year, day, constructor, partOne, partTwo);
+                    return (year, day, constructor, validators);
                 })
                 .OrderBy(_ => _.day)
                 .OrderBy(_ => _.year);
@@ -47,7 +46,7 @@ namespace Moyba.AdventOfCode
 
         public async Task SolvePuzzlesAsync()
         {
-            foreach ((var year, var day, var constructor, var validatePartOne, var validatePartTwo) in _puzzles)
+            foreach ((var year, var day, var constructor, var validators) in _puzzles)
             {
                 var data = await this.ReadInputFileAsync(year, day);
                 Console.WriteLine();
@@ -59,14 +58,23 @@ namespace Moyba.AdventOfCode
                 var puzzle = (IPuzzle)constructor.Invoke([ data.ToArray() ]);
                 times.Add(('T', stopwatch.ElapsedMilliseconds));
 
+                var key = '1';
+                var solutions = new List<string>(2);
                 stopwatch = Stopwatch.StartNew();
-                await puzzle.ComputeAsync();
-                times.Add(('C', stopwatch.ElapsedMilliseconds));
+                await foreach (var solution in puzzle.ComputeAsync())
+                {
+                    times.Add((key++, stopwatch.ElapsedMilliseconds));
+                    solutions.Add(solution);
+                    stopwatch = Stopwatch.StartNew();
+                }
 
-                var serializedTimes = String.Join(", ", times.Where(t => !Char.IsDigit(t.code) || t.time > 1).Select(_ => $"{_.code}: {_.time}"));
+                var serializedTimes = String.Join(", ", times.Select(_ => $"{_.code}: {_.time}"));
                 Console.WriteLine($"Year {year}, Day {day} [{serializedTimes}] ({overallStopwatch.Elapsed})");
-                validatePartOne(puzzle.PartOne);
-                validatePartTwo(puzzle.PartTwo);
+                for (var index = 0; index < solutions.Count; index++)
+                {
+                    if (validators.ContainsKey(index + 1)) validators[index + 1].Validate(solutions[index]);
+                    else Console.WriteLine($"  Part {index + 1}: {solutions[index]}");
+                }
             }
         }
 
@@ -101,32 +109,31 @@ namespace Moyba.AdventOfCode
         }
     }
 
-    [AttributeUsage(AttributeTargets.Property)]
-    public class SolutionAttribute(string? value = null) : Attribute
+    [AttributeUsage(AttributeTargets.Method)]
+    public abstract class SolutionAttribute(int _part, string? _value) : Attribute
     {
-        private readonly string? _value = value;
+        public int Part => _part;
 
-        public Action<string> GetValidator(string part)
+        public void Validate(string answer)
         {
-            return (string answer) => {
-                if (_value?.Equals(answer) ?? true)
-                {
-                    Console.WriteLine($"  Part {part}: {answer}");
-                }
-                else
-                {
-                    Console.WriteLine($"  Part {part} incorrect.");
-                    Console.WriteLine($"    Answer: {answer}");
-                    Console.WriteLine($"    Expected: {_value}");
-                }
-            };
+            if (_value?.Equals(answer) ?? true)
+            {
+                Console.WriteLine($"  Part {_part}: {answer}");
+            }
+            else
+            {
+                Console.WriteLine($"  Part {_part} incorrect.");
+                Console.WriteLine($"    Answer: {answer}");
+                Console.WriteLine($"    Expected: {_value}");
+            }
         }
     }
 
+    public class PartOneAttribute(string? value = null) : SolutionAttribute(1, value) { }
+    public class PartTwoAttribute(string? value = null) : SolutionAttribute(2, value) { }
+
     public interface IPuzzle
     {
-        Task ComputeAsync();
-        string PartOne { get; }
-        string PartTwo { get; }
+        IAsyncEnumerable<string> ComputeAsync();
     }
 }

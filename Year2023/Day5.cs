@@ -11,9 +11,6 @@ namespace Moyba.AdventOfCode.Year2023
         private readonly long[] _seeds;
         private readonly IDictionary<string, Map> _almanac = new Dictionary<string, Map>();
 
-        private long _singleSeedLocation;
-        private long _multiSeedLocation;
-
         public Day5(string[] data)
         {
             _seeds = data[0].Split(' ').Skip(1).Select(Int64.Parse).ToArray();
@@ -40,7 +37,9 @@ namespace Moyba.AdventOfCode.Year2023
             }
         }
 
-        public Task ComputeAsync()
+        [PartOne("662197086")]
+        [PartTwo("52510809")]
+        public async IAsyncEnumerable<string> ComputeAsync()
         {
             var sourceRanges = new SortedList<long, long>();
             foreach (var seed in _seeds)
@@ -60,7 +59,7 @@ namespace Moyba.AdventOfCode.Year2023
                 sourceRanges = targetRanges;
             }
 
-            _singleSeedLocation = sourceRanges.GetKeyAtIndex(0);
+            yield return $"{sourceRanges.GetKeyAtIndex(0)}";
 
             sourceRanges.Clear();
             for (var seedIndex = 0; seedIndex < _seeds.Length; )
@@ -82,16 +81,10 @@ namespace Moyba.AdventOfCode.Year2023
                 sourceRanges = targetRanges;
             }
 
-            _multiSeedLocation = sourceRanges.GetKeyAtIndex(0);
+            yield return $"{sourceRanges.GetKeyAtIndex(0)}";
 
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
-
-        [Solution("662197086")]
-        public string PartOne => $"{_singleSeedLocation}";
-
-        [Solution("52510809")]
-        public string PartTwo => $"{_multiSeedLocation}";
 
         private static void _UtilizeAlmanac(SortedList<long, (long end, long offset)> conversions, SortedList<long, long> sourceRanges, SortedList<long, long> targetRanges)
         {

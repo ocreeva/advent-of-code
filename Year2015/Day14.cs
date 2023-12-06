@@ -1,4 +1,3 @@
-using System.Collection.Generic;
 using System.Text.RegularExpressions;
 using Reindeer = (string name, int speed, int duration, int rest);
 

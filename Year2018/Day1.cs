@@ -4,27 +4,30 @@ namespace Moyba.AdventOfCode.Year2018
     {
         private readonly long[] _data = data.Select(Int64.Parse).ToArray();
 
-        private long _frequency;
-        private long? _duplicate;
-
-        public Task ComputeAsync()
+        [PartOne("547")]
+        [PartTwo("76414")]
+        public async IAsyncEnumerable<string> ComputeAsync()
         {
-            var reached = new HashSet<long> { _frequency };
+            var frequency = 0L;
+            long? duplicate = null;
+
+            var reached = new HashSet<long> { frequency };
 
             for (var index = 0; index < _data.Length; index++)
             {
-                _frequency += _data[index];
+                frequency += _data[index];
 
-                if (reached.Contains(_frequency) && !_duplicate.HasValue)
+                if (reached.Contains(frequency) && !duplicate.HasValue)
                 {
-                    _duplicate = _frequency;
+                    duplicate = frequency;
                 }
 
-                reached.Add(_frequency);
+                reached.Add(frequency);
             }
 
-            var frequency = _frequency;
-            while (!_duplicate.HasValue)
+            yield return $"{frequency}";
+
+            while (!duplicate.HasValue)
             {
                 for (var index = 0; index < _data.Length; index++)
                 {
@@ -32,7 +35,7 @@ namespace Moyba.AdventOfCode.Year2018
 
                     if (reached.Contains(frequency))
                     {
-                        _duplicate = frequency;
+                        duplicate = frequency;
                         break;
                     }
 
@@ -40,13 +43,9 @@ namespace Moyba.AdventOfCode.Year2018
                 }
             }
 
-            return Task.CompletedTask;
+            yield return $"{duplicate}";
+
+            await Task.CompletedTask;
         }
-
-        [Solution("547")]
-        public string PartOne => $"{_frequency}";
-
-        [Solution("76414")]
-        public string PartTwo => $"{_duplicate}";
     }
 }

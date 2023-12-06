@@ -32,30 +32,30 @@ namespace Moyba.AdventOfCode.Year2023
             ))
             .ToArray();
 
-        private int _possibleGames;
-        private int _minimumCubes;
-
-        public Task ComputeAsync()
+        [PartOne("2268")]
+        [PartTwo("63542")]
+        public async IAsyncEnumerable<string> ComputeAsync()
         {
+            var possibleGames = 0;
+            var minimumCubes = 0;
+
             foreach (var game in _games)
             {
                 var maxRed = game.rounds.Max(_ => _[_RedIndex]);
                 var maxGreen = game.rounds.Max(_ => _[_GreenIndex]);
                 var maxBlue = game.rounds.Max(_ => _[_BlueIndex]);
 
-                if (maxRed <= _RedLimit && maxGreen <= _GreenLimit && maxBlue <= _BlueLimit) _possibleGames += game.number;
+                if (maxRed <= _RedLimit && maxGreen <= _GreenLimit && maxBlue <= _BlueLimit) possibleGames += game.number;
 
-                _minimumCubes += maxRed * maxGreen * maxBlue;
+                minimumCubes += maxRed * maxGreen * maxBlue;
             }
 
-            return Task.CompletedTask;
+            yield return $"{possibleGames}";
+
+            yield return $"{minimumCubes}";
+
+            await Task.CompletedTask;
         }
-
-        [Solution("2268")]
-        public string PartOne => $"{_possibleGames}";
-
-        [Solution("63542")]
-        public string PartTwo => $"{_minimumCubes}";
 
         private static int _GetColorIndex(string color) => color switch
         {

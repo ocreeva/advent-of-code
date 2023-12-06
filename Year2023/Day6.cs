@@ -12,28 +12,24 @@ namespace Moyba.AdventOfCode.Year2023
                 .Select(Int64.Parse))
             .ToArray();
 
-        private long _productOfOptions = 1;
-        private long _longerOptions;
-
-        public Task ComputeAsync()
+        [PartOne("393120")]
+        [PartTwo("36872656")]
+        public async IAsyncEnumerable<string> ComputeAsync()
         {
+            var productOfOptions = 1L;
             foreach (var race in _races)
             {
-                _productOfOptions *= _FindWinningOptions(race.time, race.distance);
+                productOfOptions *= _FindWinningOptions(race.time, race.distance);
             }
+
+            yield return $"{productOfOptions}";
 
             var time = Int64.Parse(String.Join("", _races.Select(_ => _.time)));
             var distance = Int64.Parse(String.Join("", _races.Select(_ => _.distance)));
-            _longerOptions = _FindWinningOptions(time, distance);
+            yield return $"{_FindWinningOptions(time, distance)}";
 
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
-
-        [Solution("393120")]
-        public string PartOne => $"{_productOfOptions}";
-
-        [Solution("36872656")]
-        public string PartTwo => $"{_longerOptions}";
 
         private static long _FindWinningOptions(long time, long distance)
         {

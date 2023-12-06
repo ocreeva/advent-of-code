@@ -1,6 +1,6 @@
 namespace Moyba.AdventOfCode.Year2016
 {
-    public class Day2(string[] data) : IPuzzle
+    public class Day2(string[] _data) : IPuzzle
     {
         // U, L, R, D
         private static readonly IDictionary<char, char[]> _PartOneLookup = new Dictionary<char, char[]>
@@ -34,17 +34,19 @@ namespace Moyba.AdventOfCode.Year2016
             { 'D', [ 'B', 'D', 'D', 'D' ] },
         };
 
-        private readonly int[][] _instructions = data
+        private readonly int[][] _instructions = _data
             .Select(line => line
                 .Select(_ => (_ - 'A') % 5)
                 .ToArray())
             .ToArray();
 
-        private readonly char[] _partOneCode = new char[data.Count()];
-        private readonly char[] _partTwoCode = new char[data.Count()];
-
-        public Task ComputeAsync()
+        [PartOne("48584")]
+        [PartTwo("563B6")]
+        public async IAsyncEnumerable<string> ComputeAsync()
         {
+            var partOneCode = new char[_data.Count()];
+            var partTwoCode = new char[_data.Count()];
+
             char partOne = '5', partTwo = '5';
 
             for (var index = 0; index < _instructions.Length; index++)
@@ -56,17 +58,15 @@ namespace Moyba.AdventOfCode.Year2016
                     partTwo = _PartTwoLookup[partTwo][instruction];
                 }
 
-                _partOneCode[index] = partOne;
-                _partTwoCode[index] = partTwo;
+                partOneCode[index] = partOne;
+                partTwoCode[index] = partTwo;
             }
 
-            return Task.CompletedTask;
+            yield return String.Join("", partOneCode);
+
+            yield return String.Join("", partTwoCode);
+
+            await Task.CompletedTask;
         }
-
-        [Solution("48584")]
-        public string PartOne => String.Join("", _partOneCode);
-
-        [Solution("563B6")]
-        public string PartTwo => String.Join("", _partTwoCode);
     }
 }

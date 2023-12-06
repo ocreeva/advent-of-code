@@ -9,24 +9,24 @@ namespace Moyba.AdventOfCode.Year2015
             .Select(_ => (_[2], _[0] * _[1], _[0] + _[1]))
             .ToArray();
 
-        private long _paper;
-        private long _ribbon;
-
-        public Task ComputeAsync()
+        [PartOne("1598415")]
+        [PartTwo("3812909")]
+        public async IAsyncEnumerable<string> ComputeAsync()
         {
+            var paper = 0L;
+            var ribbon = 0L;
+
             foreach ((var maxDimension, var minArea, var minPerimeter) in _presents)
             {
-                _paper += 3 * minArea + 2 * minPerimeter * maxDimension;
-                _ribbon += 2 * minPerimeter + minArea * maxDimension;
+                paper += 3 * minArea + 2 * minPerimeter * maxDimension;
+                ribbon += 2 * minPerimeter + minArea * maxDimension;
             }
 
-            return Task.CompletedTask;
+            yield return $"{paper}";
+
+            yield return $"{ribbon}";
+
+            await Task.CompletedTask;
         }
-
-        [Solution("1598415")]
-        public string PartOne => $"{_paper}";
-
-        [Solution("3812909")]
-        public string PartTwo => $"{_ribbon}";
     }
 }

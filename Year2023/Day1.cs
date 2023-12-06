@@ -7,11 +7,13 @@ namespace Moyba.AdventOfCode.Year2023
         private static readonly Regex _LeadNumberParser = new Regex(@"\d|one|two|three|four|five|six|seven|eight|nine", RegexOptions.Compiled);
         private static readonly Regex _TailNumberParser = new Regex(@"\d|one|two|three|four|five|six|seven|eight|nine", RegexOptions.Compiled | RegexOptions.RightToLeft);
 
-        private int _numericCalibration;
-        private int _digitCalibration;
-
-        public Task ComputeAsync()
+        [PartOne("54968")]
+        [PartTwo("54094")]
+        public async IAsyncEnumerable<string> ComputeAsync()
         {
+            var numericCalibration = 0;
+            var digitCalibration = 0;
+
             foreach (var line in _data)
             {
                 var leadNumber = _LeadNumberParser.Match(line).Value;
@@ -26,18 +28,16 @@ namespace Moyba.AdventOfCode.Year2023
                     ? tailDigit
                     : _DigitLookup(line.Reverse().Where(Char.IsDigit).First());
 
-                _numericCalibration += 10 * leadNumericDigit + tailNumericDigit;
-                _digitCalibration += 10 * leadDigit + tailDigit;
+                numericCalibration += 10 * leadNumericDigit + tailNumericDigit;
+                digitCalibration += 10 * leadDigit + tailDigit;
             }
 
-            return Task.CompletedTask;
+            yield return $"{numericCalibration}";
+
+            yield return $"{digitCalibration}";
+
+            await Task.CompletedTask;
         }
-
-        [Solution("54968")]
-        public string PartOne => $"{_numericCalibration}";
-
-        [Solution("54094")]
-        public string PartTwo => $"{_digitCalibration}";
 
         private static (int digit, bool isNumeric) _DigitLookup(string s) => s switch
         {

@@ -17,11 +17,11 @@ namespace Moyba.AdventOfCode.Year2023
             })
             .ToArray();
 
-        private int _points;
-        private int _totalCards;
-
-        public Task ComputeAsync()
+        [PartOne("15205")]
+        [PartTwo("6189740")]
+        public async IAsyncEnumerable<string> ComputeAsync()
         {
+            var points = 0;
             var cardCount = new int[_cards.Length];
 
             for (var index = 0; index < _cards.Length; index++)
@@ -33,19 +33,14 @@ namespace Moyba.AdventOfCode.Year2023
                 var matches = card.winning.Intersect(card.numbers).Count();
                 if (matches == 0) continue;
 
-                _points += (int)Math.Pow(2, matches - 1);
+                points += (int)Math.Pow(2, matches - 1);
                 for (var extra = index + 1; extra <= index + matches && extra < _cards.Length; extra++) cardCount[extra] += cardCount[index];
             }
 
-            _totalCards = cardCount.Sum();
+            yield return $"{points}";
+            yield return $"{cardCount.Sum()}";
 
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
-
-        [Solution("15205")]
-        public string PartOne => $"{_points}";
-
-        [Solution("6189740")]
-        public string PartTwo => $"{_totalCards}";
     }
 }

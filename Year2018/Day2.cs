@@ -1,13 +1,10 @@
 namespace Moyba.AdventOfCode.Year2018
 {
-    public class Day2(string[] data) : IPuzzle
+    public class Day2(string[] _data) : IPuzzle
     {
-        private readonly string[] _data = data.ToArray();
-
-        private int _checksum;
-        private string? _prototypeID;
-
-        public Task ComputeAsync()
+        [PartOne("7936")]
+        [PartTwo("lnfqdscwjyteorambzuchrgpx")]
+        public async IAsyncEnumerable<string> ComputeAsync()
         {
             var doubleLetters = 0;
             var tripleLetters = 0;
@@ -18,22 +15,20 @@ namespace Moyba.AdventOfCode.Year2018
                 if (letterCounts.Contains(3)) tripleLetters++;
             }
 
-            _checksum = doubleLetters * tripleLetters;
+            yield return $"{doubleLetters * tripleLetters}";
 
             var root = new TrieNode();
             foreach (var id in _data)
             {
-                if (root.ExistsOrAdd(id.ToCharArray(), out _prototypeID)) return Task.CompletedTask;
+                if (root.ExistsOrAdd(id.ToCharArray(), out var prototypeID))
+                {
+                    yield return $"{prototypeID}";
+                    break;
+                }
             }
 
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
-
-        [Solution("7936")]
-        public string PartOne => $"{_checksum}";
-
-        [Solution("lnfqdscwjyteorambzuchrgpx")]
-        public string PartTwo => _prototypeID ?? String.Empty;
 
         private class TrieNode(int index = -1, int _ignoreIndex = -1, char[]? _initial = null)
         {

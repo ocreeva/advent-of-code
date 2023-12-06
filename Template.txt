@@ -2,15 +2,15 @@ namespace Moyba.AdventOfCode.Year20XX
 {
     public class DayXX(string[] _data) : IPuzzle
     {
-        public Task ComputeAsync()
+        [PartOne()]
+        [PartTwo()]
+        public async IAsyncEnumerable<string> ComputeAsync()
         {
+            yield return $"";
+
+            yield return $"";
+
             return Task.CompletedTask;
         }
-
-        [Solution()]
-        public string PartOne { get; private set; }
-
-        [Solution()]
-        public string PartTwo { get; private set; }
     }
 }

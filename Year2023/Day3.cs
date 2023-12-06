@@ -6,11 +6,11 @@ namespace Moyba.AdventOfCode.Year2023
     {
         private readonly int _lineLength = _data[0].Length;
 
-        private int _sumOfParts;
-        private int _gearRatios;
-
-        public Task ComputeAsync()
+        [PartOne("556367")]
+        [PartTwo("89471771")]
+        public async IAsyncEnumerable<string> ComputeAsync()
         {
+            var sumOfParts = 0;
             var gears = new Dictionary<Coord, IList<int>>();
 
             for (var lineIndex = 0; lineIndex < _data.Length; lineIndex++)
@@ -32,7 +32,7 @@ namespace Moyba.AdventOfCode.Year2023
                     }
 
                     var adjacentSymbols = this.FindAdjacentSymbols(lineIndex, startIndex, characterIndex - 1).ToArray();
-                    if (adjacentSymbols.Length > 0) _sumOfParts += number;
+                    if (adjacentSymbols.Length > 0) sumOfParts += number;
                     foreach (var gearLocation in adjacentSymbols.Where(_ => _.value == '*').Select(_ => _.location))
                     {
                         if (!gears.ContainsKey(gearLocation)) gears.Add(gearLocation, new List<int>());
@@ -41,16 +41,12 @@ namespace Moyba.AdventOfCode.Year2023
                 }
             }
 
-            _gearRatios = gears.Values.Where(_ => _.Count == 2).Select(_ => _[0] * _[1]).Sum();
+            yield return $"{sumOfParts}";
 
-            return Task.CompletedTask;
+            yield return $"{gears.Values.Where(_ => _.Count == 2).Select(_ => _[0] * _[1]).Sum()}";
+
+            await Task.CompletedTask;
         }
-
-        [Solution("556367")]
-        public string PartOne => $"{_sumOfParts}";
-
-        [Solution("89471771")]
-        public string PartTwo => $"{_gearRatios}";
 
         private IEnumerable<(char value, Coord location)> FindAdjacentSymbols(int lineIndex, int startIndex, int endIndex)
         {

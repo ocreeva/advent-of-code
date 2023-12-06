@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace System.Collection.Generic
+namespace System.Collections.Generic
 {
     internal static class EnumerableExtensions
     {
