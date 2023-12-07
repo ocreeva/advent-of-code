@@ -10,7 +10,7 @@ namespace Moyba.AdventOfCode.Year20XX
 
             yield return $"";
 
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
     }
 }
