@@ -6,5 +6,10 @@ namespace AdventOfCode.Utility
         {
             return a * b / GCD.Calculate(a, b);
         }
+
+        public static long CalculateWithBezout(long a, long b, out (long a, long b) bezoutCoefficients)
+        {
+            return a * b / GCD.CalculateWithBezout(a, b, out bezoutCoefficients);
+        }
     }
 }
