@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using AdventOfCode.Utility;
 
 namespace Moyba.AdventOfCode.Year2023
@@ -7,10 +6,11 @@ namespace Moyba.AdventOfCode.Year2023
 
     public class Day8(string[] _data) : IPuzzle
     {
-        private static readonly Regex _NodeParser = new Regex(@"^(.+) = \((.+), (.+)\)$", RegexOptions.Compiled);
-
         private readonly char[] _instructions = _data[0].ToCharArray();
-        private readonly IDictionary<string, Node> _nodes = _data.Skip(2).Transform<Node>(_NodeParser).ToDictionary(_ => _.id);
+        private readonly IDictionary<string, Node> _nodes = _data
+            .Skip(2)
+            .Select<string, Node>(_ => (_[0..3], _[7..10], _[12..15]))
+            .ToDictionary(_ => _.id);
 
         [PartOne("21797")]
         [PartTwo("23977527174353")]
