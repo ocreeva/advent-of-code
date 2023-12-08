@@ -2,59 +2,44 @@ using AdventOfCode.Utility;
 
 namespace Moyba.AdventOfCode.Year2023
 {
-    using Node = (string id, string left, string right);
-
     public class Day8(string[] _data) : IPuzzle
     {
-        private readonly char[] _instructions = _data[0].ToCharArray();
-        private readonly IDictionary<string, Node> _nodes = _data
+        private readonly int[] _instructions = _data[0].Select(_ => _ - 'L').Select(Math.Sign).ToArray();
+        private readonly IDictionary<string, string[]> _nodes = _data
             .Skip(2)
-            .Select<string, Node>(_ => (_[0..3], _[7..10], _[12..15]))
-            .ToDictionary(_ => _.id);
+            .ToDictionary<string, string, string[]>(_ => _[0..3], _ => [ _[7..10], _[12..15] ]);
 
         [PartOne("21797")]
         [PartTwo("23977527174353")]
         public async IAsyncEnumerable<string> ComputeAsync()
         {
-            var step = 0L;
-            for (var current = "AAA"; !current.Equals("ZZZ"); step++)
+            // N.B. - this is not generally valid; I'm relying on specific behavior in the input data, where cycles
+            // occur along multiples of the instruction set length, and recur with the same number of iterations
+
+            var iteration = 0L;
+            var iterationLength = _instructions.Length;
+            for (var current = "AAA"; !current.Equals("ZZZ"); iteration++)
             {
-                var instruction = _instructions[step % _instructions.Length];
-                var node = _nodes[current];
-                current = instruction switch
-                {
-                    'L' => node.left,
-                    'R' => node.right,
-                    _ => throw new Exception($"Unexpected instruction: {instruction}")
-                };
+                foreach (var instruction in _instructions) current = _nodes[current][instruction];
             }
 
-            yield return $"{step}";
+            yield return $"{iteration * iterationLength}";
 
-            // N.B. - this is not valid cycle detection; I'm relying on specific behavior in the input data to simplify the problem down to a LCM calculation
-
-            var lcm = step;
+            var lcm = iteration;
             var aNodes = _nodes.Keys.Where(_ => _.EndsWith('A')).Where(_ => !_.Equals("AAA")).ToArray();
             var zNodes = _nodes.Keys.Where(_ => _.EndsWith('Z')).ToHashSet();
             foreach (var aNode in aNodes)
             {
                 var current = aNode;
-                for (step = 0; !zNodes.Contains(current); step++)
+                for (iteration = 0; !zNodes.Contains(current); iteration++)
                 {
-                    var instruction = _instructions[step % _instructions.Length];
-                    var node = _nodes[current];
-                    current = instruction switch
-                    {
-                        'L' => node.left,
-                        'R' => node.right,
-                        _ => throw new Exception($"Unexpected instruction: {instruction}")
-                    };
+                    foreach (var instruction in _instructions) current = _nodes[current][instruction];
                 }
 
-                lcm = LCM.Calculate(lcm, step);
+                lcm = LCM.Calculate(lcm, iteration);
             }
 
-            yield return $"{lcm}";
+            yield return $"{lcm * iterationLength}";
 
             await Task.CompletedTask;
         }
