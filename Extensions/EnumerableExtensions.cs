@@ -58,7 +58,7 @@ namespace System.Collections.Generic
         private static object _TransformMatchToObject(Match match, ConstructorInfo constructor, ParameterInfo[] parameters)
         {
             if (!match.Success) throw new Exception($"Regex did not match input.");
-            if (parameters.Length != match.Groups.Count + 1) throw new Exception($"Regex match count ({match.Groups.Count}) does not match object constructor parameter count ({parameters.Length}).");
+            if (parameters.Length != match.Groups.Count - 1) throw new Exception($"Regex match count ({match.Groups.Count}) does not match object constructor parameter count ({parameters.Length}).");
 
             var arguments = Enumerable
                 .Range(0, parameters.Length)
