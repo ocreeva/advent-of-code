@@ -9,7 +9,6 @@ namespace Moyba.AdventOfCode
 
         public override async Task SolveAsync()
         {
-            await this.SolveAsync(() => Puzzles2022.Day3);
             await this.SolveAsync(() => Puzzles2022.Day4, LineDelimited, new Regex(@"(?<Min1>\d+)\-(?<Max1>\d+),(?<Min2>\d+)-(?<Max2>\d+)"));
             await this.SolveAsync(() => Puzzles2022.Day5);
             await this.SolveAsync(() => Puzzles2022.Day6, LineDelimited, AsString);
@@ -1419,34 +1418,6 @@ namespace Moyba.AdventOfCode
             }
 
             return ($"{puzzle1}", $"{puzzle2}");
-        }
-
-        [Answer("7863", "2488")]
-        private static (string, string) Day3(IEnumerable<string> input)
-        {
-            long priority1 = 0L, priority2 = 0L;
-
-            var index = 0;
-            char[][] rucksacks = new char[3][];
-            foreach (var line in input)
-            {
-                var packSize = line.Length;
-                var compartmentSize = packSize >> 1;
-                var rucksack = line.ToCharArray();
-
-                var overlap = rucksack[0..compartmentSize].Intersect(rucksack[compartmentSize..packSize]).Single();
-                priority1 += (Char.IsLower(overlap) ? (1 + overlap - 'a') : (27 + overlap - 'A'));
-
-                rucksacks[index++] = rucksack;
-                if (index == 3)
-                {
-                    index = 0;
-                    var badge = rucksacks[0].Intersect(rucksacks[1]).Intersect(rucksacks[2]).Single();
-                    priority2 += (Char.IsLower(badge) ? (1 + badge - 'a') : (27 + badge - 'A'));
-                }
-            }
-
-            return ($"{priority1}", $"{priority2}");
         }
     }
 }
