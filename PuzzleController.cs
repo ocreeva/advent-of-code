@@ -63,8 +63,16 @@ namespace Moyba.AdventOfCode
                 stopwatch = Stopwatch.StartNew();
                 await foreach (var solution in puzzle.ComputeAsync())
                 {
-                    times.Add((key++, stopwatch.ElapsedMilliseconds));
-                    solutions.Add(solution);
+                    if (solution == null)
+                    {
+                        times.Add(('C', stopwatch.ElapsedMilliseconds));
+                    }
+                    else
+                    {
+                        times.Add((key++, stopwatch.ElapsedMilliseconds));
+                        solutions.Add(solution);
+                    }
+
                     stopwatch = Stopwatch.StartNew();
                 }
 
@@ -134,6 +142,6 @@ namespace Moyba.AdventOfCode
 
     public interface IPuzzle
     {
-        IAsyncEnumerable<string> ComputeAsync();
+        IAsyncEnumerable<string?> ComputeAsync();
     }
 }
