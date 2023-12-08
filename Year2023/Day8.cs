@@ -29,8 +29,6 @@ namespace Moyba.AdventOfCode.Year2023
                 };
             }
 
-            Console.WriteLine($"Test: {(step) % _instructions.Length}");
-
             yield return $"{step}";
 
             // N.B. - this is not valid cycle detection; I'm relying on specific behavior in the input data to simplify the problem down to a LCM calculation
