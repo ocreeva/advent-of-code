@@ -4,7 +4,7 @@ namespace Moyba.AdventOfCode.Year20XX
     {
         [PartOne()]
         [PartTwo()]
-        public async IAsyncEnumerable<string> ComputeAsync()
+        public async IAsyncEnumerable<string?> ComputeAsync()
         {
             yield return $"";
 
