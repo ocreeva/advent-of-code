@@ -9,7 +9,6 @@ namespace Moyba.AdventOfCode
 
         public override async Task SolveAsync()
         {
-            await this.SolveAsync(() => Puzzles2022.Day6, LineDelimited, AsString);
             await this.SolveAsync(() => Puzzles2022.Day7);
             await this.SolveAsync(() => Puzzles2022.Day8);
             await this.SolveAsync(() => Puzzles2022.Day9);
@@ -1315,28 +1314,6 @@ namespace Moyba.AdventOfCode
             var availableSpace = 70_000_000 - root.Size;
             var neededSpace = 30_000_000 - availableSpace;
             var puzzle2 = allDirectories.Where(d => d.Size > neededSpace).Min(d => d.Size);
-
-            return ($"{puzzle1}", $"{puzzle2}");
-        }
-
-        [Answer("1356", "2564")]
-        private static (string, string) Day6(string input)
-        {
-            long puzzle1 = 0L, puzzle2 = 0L;
-
-            for (var index = 0; index < input.Length - 3; index++)
-            {
-                if (puzzle1 == 0)
-                {
-                    var distinctCount = input[index..(index+4)].Distinct().Count();
-                    if (distinctCount == 4) puzzle1 = index + 4;
-                }
-
-                var distinctCount2 = input[index..(index+14)].Distinct().Count();
-                if (distinctCount2 == 14) puzzle2 = index + 14;
-
-                if (puzzle2 != 0) break;
-            }
 
             return ($"{puzzle1}", $"{puzzle2}");
         }
