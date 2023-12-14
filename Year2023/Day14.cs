@@ -17,10 +17,9 @@ namespace Moyba.AdventOfCode.Year2023
         {
             this.TiltNorth();
 
-            yield return $"{this.CalculateTotalLoad()}";
+            yield return $"{this.CalculateTotalLoad(_map)}";
 
             var pastMaps = new Dictionary<string, long>();
-            var pastLoad = new Dictionary<long, long>();
             for (var iteration = 0L; iteration < _MaxCycles; iteration++)
             {
                 this.TiltWest();
@@ -34,12 +33,18 @@ namespace Moyba.AdventOfCode.Year2023
                     var cycleLength = iteration - previousIteration;
                     var offset = (_MaxCycles - previousIteration - 1) % cycleLength;
                     var targetIteration = previousIteration + offset;
-                    yield return $"{pastLoad[targetIteration]}";
+                    var map = pastMaps
+                        .Where(_ => _.Value == targetIteration)
+                        .Select(_ => _.Key)
+                        .Single()
+                        .Split(' ')
+                        .Select(_ => _.ToCharArray())
+                        .ToArray();
+                    yield return $"{this.CalculateTotalLoad(map)}";
                     break;
                 }
 
                 pastMaps.Add(key, iteration);
-                pastLoad.Add(iteration, this.CalculateTotalLoad());
 
                 this.TiltNorth();
             }
@@ -47,7 +52,7 @@ namespace Moyba.AdventOfCode.Year2023
             await Task.CompletedTask;
         }
 
-        private long CalculateTotalLoad()
+        private long CalculateTotalLoad(char[][] map)
         {
             var total = 0L;
             for (var y = 0; y < _height; y++)
@@ -55,7 +60,7 @@ namespace Moyba.AdventOfCode.Year2023
                 var load = _height - y;
                 for (var x = 0; x < _width; x++)
                 {
-                    if (_map[y][x] != _RoundRock) continue;
+                    if (map[y][x] != _RoundRock) continue;
                     total += load;
                 }
             }
