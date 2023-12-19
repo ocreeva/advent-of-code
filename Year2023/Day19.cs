@@ -5,6 +5,7 @@ namespace Moyba.AdventOfCode.Year2023
     using WorkflowRaw = (string name, string rules, string defaultWorkflow);
     using Workflow = (ICollection<(Day19.WorkflowCondition condition, string nextWorkflow)> rules, string defaultWorkflow);
     using Part = IDictionary<char, long>;
+    using PartRange = IDictionary<char, SortedList<long, long>>;
 
     public class Day19 : IPuzzle
     {
@@ -42,7 +43,7 @@ namespace Moyba.AdventOfCode.Year2023
         }
 
         [PartOne("367602")]
-        [PartTwo()]
+        [PartTwo("125317461667458")]
         public async IAsyncEnumerable<string?> ComputeAsync()
         {
             var acceptedPartsSum = 0L;
@@ -69,7 +70,41 @@ namespace Moyba.AdventOfCode.Year2023
 
             yield return $"{acceptedPartsSum}";
 
-            yield return $"";
+            var acceptedRatings = 0L;
+            var queue = new Queue<(string workflowName, PartRange parts)>();
+            var allParts = new Dictionary<char, SortedList<long, long>>
+            {
+                { 'x', new SortedList<long, long> { { 1, 4001 } } },
+                { 'm', new SortedList<long, long> { { 1, 4001 } } },
+                { 'a', new SortedList<long, long> { { 1, 4001 } } },
+                { 's', new SortedList<long, long> { { 1, 4001 } } },
+            };
+            queue.Enqueue(("in", allParts));
+            while (queue.TryDequeue(out var entry))
+            {
+                (var workflowName, var parts) = entry;
+
+                switch (workflowName)
+                {
+                    case "A":
+                        acceptedRatings += parts.Values.Aggregate(1L, (product, ratings) => product * ratings.Sum(rating => rating.Value - rating.Key));
+                        continue;
+
+                    case "R":
+                        continue;
+                }
+
+                var workflow = _workflows[workflowName];
+                foreach (var rule in workflow.rules)
+                {
+                    var matchingParts = rule.condition.Split(parts);
+                    if (matchingParts.Values.All(_ => _.Count > 0)) queue.Enqueue((rule.nextWorkflow, matchingParts));
+                }
+
+                if (parts.Values.All(_ => _.Count > 0)) queue.Enqueue((workflow.defaultWorkflow, parts));
+            }
+
+            yield return $"{acceptedRatings}";
 
             await Task.CompletedTask;
         }
@@ -95,6 +130,82 @@ namespace Moyba.AdventOfCode.Year2023
             public long Value { get; }
 
             public Func<Part, bool> Evaluate { get; }
+
+            public PartRange Split(PartRange parts)
+            {
+                var matchingParts = new Dictionary<char, SortedList<long, long>>();
+
+                // copy all ratings which aren't being evaluated
+                foreach (var key in parts.Keys)
+                {
+                    if (key == this.Key) matchingParts.Add(key, new SortedList<long, long>());
+                    else matchingParts.Add(key, new SortedList<long, long>(parts[key]));
+                }
+
+                switch (this.Operation)
+                {
+                    case '<':
+                        this.SplitForLessThan(parts, matchingParts);
+                        break;
+
+                    case '>':
+                        this.SplitForGreaterThan(parts, matchingParts);
+                        break;
+                }
+
+                return matchingParts;
+            }
+
+            private void SplitForGreaterThan(PartRange source, PartRange target)
+            {
+                var sourceRanges = source[this.Key];
+                var targetRanges = target[this.Key];
+
+                var splitValue = this.Value + 1;
+                for (var index = sourceRanges.Count - 1; index >= 0; index--)
+                {
+                    var sourceRangeStart = sourceRanges.GetKeyAtIndex(index);
+                    var sourceRangeEnd = sourceRanges[sourceRangeStart];
+
+                    if (sourceRangeEnd <= splitValue) return;
+
+                    if (sourceRangeStart < splitValue)
+                    {
+                        targetRanges.Add(splitValue, sourceRangeEnd);
+                        sourceRanges[sourceRangeStart] = splitValue;
+                        return;
+                    }
+
+                    sourceRanges.Remove(sourceRangeStart);
+                    targetRanges.Add(sourceRangeStart, sourceRangeEnd);
+                }
+            }
+
+            private void SplitForLessThan(PartRange source, PartRange target)
+            {
+                var sourceRanges = source[this.Key];
+                var targetRanges = target[this.Key];
+
+                var splitValue = this.Value;
+                for (var index = 0; index < sourceRanges.Count; index++)
+                {
+                    var sourceRangeStart = sourceRanges.GetKeyAtIndex(index);
+                    var sourceRangeEnd = sourceRanges[sourceRangeStart];
+
+                    if (sourceRangeStart >= splitValue) return;
+
+                    sourceRanges.Remove(sourceRangeStart);
+
+                    if (sourceRangeEnd > splitValue)
+                    {
+                        targetRanges.Add(sourceRangeStart, splitValue);
+                        sourceRanges.Add(splitValue, sourceRangeEnd);
+                        return;
+                    }
+
+                    targetRanges.Add(sourceRangeStart, sourceRangeEnd);
+                }
+            }
         }
     }
 }
