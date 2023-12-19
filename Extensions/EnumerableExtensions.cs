@@ -18,7 +18,10 @@ namespace System.Collections.Generic
         {
             using (var enumerator = enumerable.GetEnumerator())
             {
-                while (enumerator.MoveNext()) yield return _ClusterGroup(enumerator);
+                while (enumerator.MoveNext())
+                {
+                    yield return _ClusterGroup(enumerator).ToArray();
+                }
             }
         }
 
