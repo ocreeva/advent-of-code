@@ -25,7 +25,7 @@ namespace Moyba.AdventOfCode.Year2023
             .ToArray();
 
         [PartOne("92758")]
-        [PartTwo()]
+        [PartTwo("62762509300678")]
         public async IAsyncEnumerable<string?> ComputeAsync()
         {
             yield return $"{_MeasureArea(_plan.Select(_ExtractInstructionFromPlan))}";
