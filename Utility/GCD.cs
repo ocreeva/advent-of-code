@@ -1,4 +1,4 @@
-namespace AdventOfCode.Utility
+namespace Moyba.AdventOfCode.Utility
 {
     public static class GCD
     {

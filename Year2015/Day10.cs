@@ -1,4 +1,4 @@
-using AdventOfCode.Utility;
+using Moyba.AdventOfCode.Utility;
 
 namespace Moyba.AdventOfCode.Year2015
 {
