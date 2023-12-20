@@ -61,7 +61,6 @@ namespace Moyba.AdventOfCode.Year2023
             {
                 var y = horizontals.GetKeyAtIndex(index);
                 area += (y - previousY) * current.Sum(_ => _.Value - _.Key + 1);
-                // _ResolveHorizontals(current, horizontals.GetValueAtIndex(index), ref area);
                 foreach (var horizontal in horizontals.GetValueAtIndex(index).Values) area += _ApplyRange(current, horizontal.start, horizontal.end);
                 previousY = y;
             }
@@ -143,79 +142,6 @@ namespace Moyba.AdventOfCode.Year2023
             }
 
             return areaRemoved;
-        }
-
-        private static void _ResolveHorizontals(SortedList<long, Range> ranges, SortedList<long, Range> horizontals, ref long area)
-        {
-            var rangeIndex = 0;
-            for (var horizontalIndex = 0; horizontalIndex < horizontals.Count; horizontalIndex++)
-            {
-                var horizontal = horizontals.GetValueAtIndex(horizontalIndex);
-
-                rangeIndex--;
-                Range? range;
-                do
-                {
-                    range = ++rangeIndex < ranges.Count ? ranges.GetValueAtIndex(rangeIndex) : null;
-                }
-                while (range != null && horizontal.start > range.Value.end);
-
-                if (range == null || horizontal.end < range.Value.start)
-                {
-                    ranges.Add(horizontal.start, horizontal);
-                    continue;
-                }
-
-                // overlap or adjacency in all following cases
-                ranges.RemoveAt(rangeIndex);
-
-                if (horizontal.end == range.Value.start)
-                {
-                    ranges.Add(horizontal.start, (horizontal.start, range.Value.end));
-                    continue;
-                }
-
-                if (horizontal.start == range.Value.end)
-                {
-                    ranges.Add(range.Value.start, (range.Value.start, horizontal.end));
-                    continue;
-                }
-
-                if (horizontal.start < range.Value.start) throw new Exception("Unexpected case #1.");
-
-                if (horizontal.start == range.Value.start)
-                {
-                    if (horizontal.end == range.Value.end)
-                    {
-                        area += horizontal.end - horizontal.start + 1;
-                        continue;
-                    }
-
-                    Range newRange = (Math.Min(horizontal.end, range.Value.end), Math.Max(horizontal.end, range.Value.end));
-                    ranges.Add(newRange.start, newRange);
-                    area += newRange.start - horizontal.start;
-                    continue;
-                }
-
-                if (horizontal.end == range.Value.end)
-                {
-                    Range newRange = (Math.Min(horizontal.start, range.Value.start), Math.Max(horizontal.start, range.Value.start));
-                    ranges.Add(newRange.start, newRange);
-                    area += horizontal.end - newRange.end;
-                    continue;
-                }
-
-                if (horizontal.end > range.Value.end) throw new Exception($"Unexpected case #2: ({horizontal.start}, {horizontal.end}) ({range.Value.start}, {range.Value.end})");
-
-                // one is inside the other, split into two
-                Range newRangeStart = (Math.Min(horizontal.start, range.Value.start), Math.Max(horizontal.start, range.Value.start));
-                ranges.Add(newRangeStart.start, newRangeStart);
-
-                Range newRangeEnd = (Math.Min(horizontal.end, range.Value.end), Math.Max(horizontal.end, range.Value.end));
-                ranges.Add(newRangeEnd.start, newRangeEnd);
-
-                area += newRangeEnd.start - newRangeStart.end - 1;
-            }
         }
 
         private static Instruction _ExtractInstructionFromPlan(Plan plan) => plan.direction switch
