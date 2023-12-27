@@ -1,8 +1,15 @@
+using System.Numerics;
+
 namespace Moyba.AdventOfCode.Utility
 {
     public static class LCM
     {
         public static long Calculate(long a, long b)
+        {
+            return a * b / GCD.Calculate(a, b);
+        }
+
+        public static BigInteger Calculate(BigInteger a, BigInteger b)
         {
             return a * b / GCD.Calculate(a, b);
         }
