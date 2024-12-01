@@ -12,8 +12,8 @@ namespace Moyba.AdventOfCode.Year2024
             _right = split.Select(_ => Int64.Parse(_[1])).Order().ToArray();
         }
 
-        [PartOne()]
-        [PartTwo()]
+        [PartOne("1889772")]
+        [PartTwo("23228917")]
         public async IAsyncEnumerable<string?> ComputeAsync()
         {
             var distance = Enumerable.Range(0, _left.Length).Select(_ => Int64.Abs(_left[_] - _right[_])).Sum();
