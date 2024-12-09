@@ -13,62 +13,55 @@ namespace Moyba.AdventOfCode.Year2024
         [PartTwo("97902809384118")]
         public async IAsyncEnumerable<string?> ComputeAsync()
         {
-            var part1 = 0L;
+            var validEquations = _equations.Select(_ => (_, _IsValidEquation(_.value, _.numbers, _.numbers.Length - 1)));
 
-            foreach (var equation in _equations)
-            {
-                var partialValues = new HashSet<long> { equation.numbers[0] };
-                for (var i = 1; i < equation.numbers.Length; i++)
-                {
-                    var nextNumber = equation.numbers[i];
-                    var nextPartialValues = new HashSet<long>();
-                    foreach (var partialValue in partialValues)
-                    {
-                        var sum = partialValue + nextNumber;
-                        if (sum <= equation.value) nextPartialValues.Add(sum);
-
-                        var product = partialValue * nextNumber;
-                        if (product <= equation.value) nextPartialValues.Add(product);
-                    }
-
-                    partialValues = nextPartialValues;
-                }
-
-                if (partialValues.Contains(equation.value)) part1 += equation.value;
-            }
+            var part1 = validEquations.Where(_ => _.Item2).Sum(_ => _.Item1.value);
 
             yield return $"{part1}";
 
-            var part2 = 0L;
-            foreach (var equation in _equations)
-            {
-                var partialValues = new HashSet<long> { equation.numbers[0] };
-                for (var i = 1; i < equation.numbers.Length; i++)
-                {
-                    var nextNumber = equation.numbers[i];
-                    var nextPowerOf10 = (long)Math.Pow(10, Math.Ceiling(Math.Log10(nextNumber + 1)));
-                    var nextPartialValues = new HashSet<long>();
-                    foreach (var partialValue in partialValues)
-                    {
-                        var sum = partialValue + nextNumber;
-                        if (sum <= equation.value) nextPartialValues.Add(sum);
-
-                        var product = partialValue * nextNumber;
-                        if (product <= equation.value) nextPartialValues.Add(product);
-
-                        var concatenation = partialValue * nextPowerOf10 + nextNumber;
-                        if (concatenation <= equation.value) nextPartialValues.Add(concatenation);
-                    }
-
-                    partialValues = nextPartialValues;
-                }
-
-                if (partialValues.Contains(equation.value)) part2 += equation.value;
-            }
+            var part2 = part1 + validEquations
+                .Where(_ => !_.Item2)
+                .Select(_ => _.Item1)
+                .Where(_ => _IsValidEquation(_.value, _.numbers, _.numbers.Length - 1, tryConcatentation: true))
+                .Sum(_ => _.value);
 
             yield return $"{part2}";
 
             await Task.CompletedTask;
+        }
+
+        private static bool _IsValidEquation(long value, long[] numbers, int index, bool tryConcatentation = false)
+        {
+            var number = numbers[index];
+
+            if (index == 0) return value == number;
+
+            // try concatenation
+            if (tryConcatentation)
+            {
+                var powerOf10 = (long)Math.Pow(10, Math.Ceiling(Math.Log10(number + 1)));
+                if (value % powerOf10 == number)
+                {
+                    var concatenationIsValid = _IsValidEquation(value / powerOf10, numbers, index - 1, tryConcatentation);
+                    if (concatenationIsValid) return true;
+                }
+            }
+
+            // try multiplication
+            if (value % number == 0)
+            {
+                var multiplicationIsValid = _IsValidEquation(value / number, numbers, index - 1, tryConcatentation);
+                if (multiplicationIsValid) return true;
+            }
+
+            // try addition
+            if (value > number)
+            {
+                var sumIsValid = _IsValidEquation(value - number, numbers, index - 1, tryConcatentation);
+                if (sumIsValid) return true;
+            }
+
+            return false;
         }
     }
 }
