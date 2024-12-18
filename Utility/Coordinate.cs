@@ -9,7 +9,8 @@ namespace Moyba.AdventOfCode.Utility
             _North = new Coordinate(0, -1),
             _East  = new Coordinate(1, 0),
             _South = new Coordinate(0, 1),
-            _West = new Coordinate(-1, 0);
+            _West = new Coordinate(-1, 0),
+            _Zero = new Coordinate(0, 0);
         private static readonly Coordinate[] _Orthogonal = [ _North, _East, _South, _West ];
 
         public Coordinate(Group x, Group y) : this(x.Value, y.Value) { }
@@ -28,6 +29,7 @@ namespace Moyba.AdventOfCode.Utility
         public static Coordinate East => _East;
         public static Coordinate South => _South;
         public static Coordinate West => _West;
+        public static Coordinate Zero => _Zero;
 
         public static IEnumerable<Coordinate> Orthogonals => _Orthogonal;
 
