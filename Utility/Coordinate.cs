@@ -7,20 +7,24 @@ namespace Moyba.AdventOfCode.Utility
     {
         private static readonly Coordinate
             _North = new Coordinate(0, -1),
+            _NorthEast = new Coordinate(1, -1),
             _East  = new Coordinate(1, 0),
+            _SouthEast = new Coordinate(1, 1),
             _South = new Coordinate(0, 1),
+            _SouthWest = new Coordinate(-1, 1),
             _West = new Coordinate(-1, 0),
+            _NorthWest = new Coordinate(-1, -1),
             _Zero = new Coordinate(0, 0);
         private static readonly Coordinate[] _Orthogonal = [ _North, _East, _South, _West ];
         private static readonly Coordinate[] _Adjacent = [
             _North,
-            new Coordinate(1, -1),
+            _NorthEast,
             _East,
-            new Coordinate(1, 1),
+            _SouthEast,
             _South,
-            new Coordinate(-1, 1),
+            _SouthWest,
             _West,
-            new Coordinate(-1, -1)
+            _NorthWest
         ];
 
         public Coordinate(Group x, Group y) : this(x.Value, y.Value) { }
@@ -41,8 +45,8 @@ namespace Moyba.AdventOfCode.Utility
         public static Coordinate West => _West;
         public static Coordinate Zero => _Zero;
 
-        public IEnumerable<Coordinate> Adjacent => _Adjacent.Select(_Sum);
-        public IEnumerable<Coordinate> Orthogonal => _Orthogonal.Select(_Sum);
+        public IEnumerable<Coordinate> Adjacent => this == Zero ? _Adjacent : _Adjacent.Select(_SumWithThis);
+        public IEnumerable<Coordinate> Orthogonal => this == Zero ? _Orthogonal : _Orthogonal.Select(_SumWithThis);
 
         public long x;
         public long y;
@@ -65,6 +69,6 @@ namespace Moyba.AdventOfCode.Utility
         public override string ToString()
             => $"{this.x}, {this.y}, {this.z}";
 
-        private Coordinate _Sum(Coordinate c) => this + c;
+        private Coordinate _SumWithThis(Coordinate c) => this + c;
     }
 }
