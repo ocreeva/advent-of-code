@@ -56,9 +56,8 @@ namespace Moyba.AdventOfCode.Year2024
             {
                 var position = queue.Dequeue();
                 var time = timeAtPosition[position];
-                foreach (var orthogonal in Coordinate.Orthogonals)
+                foreach (var nextPosition in position.Orthogonal)
                 {
-                    var nextPosition = position + orthogonal;
                     if (!_track.Contains(nextPosition)) continue;
 
                     if (timeAtPosition.ContainsKey(nextPosition)) continue;

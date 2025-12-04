@@ -38,9 +38,8 @@ namespace Moyba.AdventOfCode.Year2024
             {
                 var position = queue.Dequeue();
                 var nextSteps = stepsTo[position] + 1;
-                foreach (var orthogonal in Coordinate.Orthogonals)
+                foreach (var nextPosition in position.Orthogonal)
                 {
-                    var nextPosition = position + orthogonal;
                     if (nextPosition.x < 0 || nextPosition.x > 70 ||
                         nextPosition.y < 0 || nextPosition.y > 70) continue;
 

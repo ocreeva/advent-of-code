@@ -53,7 +53,7 @@ namespace Moyba.AdventOfCode.Year2024
                 {
                     if (!_tiles.Contains(position)) break;
 
-                    var adjacent = Coordinate.Orthogonals.Select(_ => position + _).Where(_ => _tiles.Contains(_)).ToArray();
+                    var adjacent = position.Orthogonal.Where(_ => _tiles.Contains(_)).ToArray();
                     if (adjacent.Length > 1) break;
 
                     _tiles.Remove(position);
@@ -63,7 +63,7 @@ namespace Moyba.AdventOfCode.Year2024
             }
 
             _intersections = _tiles
-                .Where(tile => tile == _start || tile == _end || Coordinate.Orthogonals.Count(orthogonal => _tiles.Contains(tile + orthogonal)) > 2)
+                .Where(tile => tile == _start || tile == _end || tile.Orthogonal.Count(_ => _tiles.Contains(_)) > 2)
                 .ToHashSet();
         }
 
@@ -78,7 +78,7 @@ namespace Moyba.AdventOfCode.Year2024
                 if (intersection == _end) continue;
 
                 routes[intersection] = new Dictionary<Coordinate, Route>();
-                foreach (var orthogonal in Coordinate.Orthogonals)
+                foreach (var orthogonal in Coordinate.Zero.Orthogonal)
                 {
                     if (this.TryWalkPath(intersection, orthogonal, out Route route))
                     {
