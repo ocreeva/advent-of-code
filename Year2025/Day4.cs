@@ -45,16 +45,8 @@ namespace Moyba.AdventOfCode.Year2025
 
         private static IEnumerable<Coordinate> _GetRollCoordinates(string data, int y)
         => data
-            .Select(_GetRollPosition)
-            .Where(_ => _.HasValue)
-            .Select(_ => new Coordinate(_.Value, y));
-
-        private static int? _GetRollPosition(char data, int x)
-        => data switch
-        {
-            '@' => x,
-            '.' => null,
-            _ => throw new Exception($"Unexpected input: {data}")
-        };
+            .Select((c, x) => (c, x))
+            .Where(_ => _.c == '@')
+            .Select(_ => new Coordinate(_.x, y));
     }
 }
