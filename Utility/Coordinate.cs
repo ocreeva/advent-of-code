@@ -66,6 +66,11 @@ namespace Moyba.AdventOfCode.Utility
         public override int GetHashCode()
             => HashCode.Combine(this.x, this.y, this.z);
 
+        public double GetMagnitude()
+            => Math.Sqrt(this.GetSquareMagnitude());
+        public long GetSquareMagnitude()
+            => this.x * this.x + this.y * this.y + this.z * this.z;
+
         public override string ToString()
             => $"{this.x}, {this.y}, {this.z}";
 
