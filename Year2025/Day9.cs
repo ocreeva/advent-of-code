@@ -2,8 +2,8 @@ using Moyba.AdventOfCode.Utility;
 
 namespace Moyba.AdventOfCode.Year2025
 {
+    using Range = (int start, int end);
     using Segment = (long index, long start, long end);
-    using Rectangle = (long xMin, long yMin, long xMax, long yMax);
 
     public class Day9(string[] _data) : IPuzzle
     {
@@ -33,35 +33,30 @@ namespace Moyba.AdventOfCode.Year2025
             var allX = _redTiles.Select(_ => _.x).Distinct().Order().ToArray();
             var allY = _redTiles.Select(_ => _.y).Distinct().Order().ToArray();
 
-            // create reverse lookups, for perf
             var xIndices = allX.Select((_, index) => (_, index)).ToDictionary(_ => _.Item1, _ => _.Item2);
             var yIndices = allY.Select((_, index) => (_, index)).ToDictionary(_ => _.Item1, _ => _.Item2);
 
-            var horizontal = new List<Segment>(_redTiles.Length >> 1);
-            var vertical = new List<Segment>(_redTiles.Length >> 1);
-            for (var index = 0; index < _redTiles.Length; index++) _GenerateSegment(_redTiles[index], _redTiles[(index + 1) % _redTiles.Length], horizontal, vertical);
+            var horizontal = Enumerable.Range(0, allY.Length).Select(_ => new List<Range>()).ToArray();
+            var vertical = Enumerable.Range(0, allX.Length).Select(_ => new List<Range>()).ToArray();
+            for (var index = 0; index < _redTiles.Length; index++)
+            {
+                var c1 = _redTiles[index];
+                var c2 = _redTiles[(index + 1) % _redTiles.Length];
+                _AddRange(xIndices[c1.x], yIndices[c1.y], xIndices[c2.x], yIndices[c2.y], horizontal, vertical);
+            }
 
-            var rectangles = new HashSet<Rectangle>();
+            var rectangles = Enumerable.Range(0, allY.Length - 1).Select(_ => new bool[allX.Length - 1]).ToArray();
             for (var xIndex = 0; xIndex < allX.Length - 1; xIndex++)
             {
-                var xMin = allX[xIndex];
-                var xMax = allX[xIndex + 1];
-
                 for (var yIndex = 0; yIndex < allY.Length - 1; yIndex++)
                 {
-                    var yMin = allY[yIndex];
-                    var yMax = allY[yIndex + 1];
+                    var hCount = horizontal[0..(yIndex + 1)].Count(_ => _.Any(_ => _.start <= xIndex && _.end > xIndex));
+                    if (hCount % 2 != 1) continue;
 
-                    // count the horizontal segments above yMin, which cover xMin to xMax
-                    var horizontalCount = horizontal.Count(_ => _.index <= yMin && _.start <= xMin && _.end >= xMax);
-                    if (horizontalCount % 2 != 1) continue;
+                    var vCount = vertical[0..(xIndex + 1)].Count(_ => _.Any(_ => _.start <= yIndex && _.end > yIndex));
+                    if (vCount % 2 != 1) continue;
 
-                    // same thing with vertical
-                    var verticalCount = vertical.Count(_ => _.index <= xMin && _.start <= yMin && _.end >= yMax);
-                    if (verticalCount % 2 != 1) continue;
-
-                    // success, we found a rectangle that's 'inside'
-                    rectangles.Add((xMin, yMin, xMax, yMax));
+                    rectangles[yIndex][xIndex] = true;
                 }
             }
 
@@ -80,24 +75,32 @@ namespace Moyba.AdventOfCode.Year2025
                     var xMax = Math.Max(c1.x, c2.x);
                     var yMin = Math.Min(c1.y, c2.y);
                     var yMax = Math.Max(c1.y, c2.y);
-                    for (var xIndex = xIndices[xMin]; xIndex < xIndices[xMax]; xIndex++)
-                    {
-                        for (var yIndex = yIndices[yMin]; yIndex < yIndices[yMax]; yIndex++)
-                        {
-                            var rectangle = (allX[xIndex], allY[yIndex], allX[xIndex + 1], allY[yIndex + 1]);
-                            if (!rectangles.Contains(rectangle)) goto SkipToTheEnd;
-                        }
-                    }
+                    if (!Enumerable.Range(xIndices[xMin], xIndices[xMax] - xIndices[xMin]).All(xIndex =>
+                        Enumerable.Range(yIndices[yMin], yIndices[yMax] - yIndices[yMin]).All(yIndex => rectangles[yIndex][xIndex]))) continue;
 
                     puzzle2 = area;
-
-                    SkipToTheEnd: ;
                 }
             }
 
             yield return $"{puzzle2}";
 
             await Task.CompletedTask;
+        }
+
+        private static void _AddRange(int xIndex1, int yIndex1, int xIndex2, int yIndex2, List<Range>[] horizontal, List<Range>[] vertical)
+        {
+            if (xIndex1 == xIndex2)
+            {
+                vertical[xIndex1].Add((Math.Min(yIndex1, yIndex2), Math.Max(yIndex1, yIndex2)));
+            }
+            else if (yIndex1 == yIndex2)
+            {
+                horizontal[yIndex1].Add((Math.Min(xIndex1, xIndex2), Math.Max(xIndex1, xIndex2)));
+            }
+            else
+            {
+                throw new Exception($"Unexpected diagonal line: ({xIndex1}, {yIndex1}), ({xIndex2}, {yIndex2})");
+            }
         }
 
         private static void _GenerateSegment(Coordinate a, Coordinate b, List<Segment> horizontal, List<Segment> vertical)
